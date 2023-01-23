@@ -1,11 +1,18 @@
-const express = require('express');
-
+const express = require("express");
+const fs = require("fs");
 const app = express();
 
-app.use((req,res,next)=>{
-    res.status(200).json({
-        message: 'hello World'
-    });
-});
+var cors = require("cors");
+app.use(cors());
 
-module.exports=app;
+var data = fs.readFileSync("terminalList.json");
+var myObject = JSON.parse(data);
+
+app.get("/terminals", (req, res) => {
+  res.json(myObject);
+});
+// app.use((req, res, next) => {
+//   res.json(myObject);
+// });
+
+module.exports = app;
