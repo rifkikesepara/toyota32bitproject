@@ -1,15 +1,13 @@
 import React from "react";
-import "./Terminal.css";
 import axios from "axios";
+import "../Pages/Terminal.css";
 
 export default function Terminals() {
   const [terminals, setTerminals] = React.useState([]);
 
-  const [count, setCount] = React.useState(0);
-
   React.useEffect(() => {
     axios
-      .get("http://localhost:3001/terminals")
+      .get("http://192.168.1.8:3001/terminals")
       .then((response) => {
         setTerminals(response.data);
       })
@@ -29,15 +27,18 @@ export default function Terminals() {
             Filtre Bazında
           </th>
         </tr>
+
         {terminals.data &&
           terminals.data.map((prevData) => (
             <tr>
               <td>
-                ({prevData.depCode}) {prevData.depName}
+                ({prevData.shopCode}) {prevData.depName}
               </td>
               <td className="filters">
                 {prevData.filterBaseds.map((filterData) => (
-                  <a>
+                  <a
+                    href={`terminal/${prevData.depCode}/${filterData.filterCode}`}
+                  >
                     {filterData.linkCount != 1 && <b>{filterData.linkCount}</b>}
                     <td>{filterData.filterCode}</td>
                   </a>

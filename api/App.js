@@ -6,13 +6,16 @@ var cors = require("cors");
 app.use(cors());
 
 var data = fs.readFileSync("terminalList.json");
-var myObject = JSON.parse(data);
+var terminalList = JSON.parse(data);
 
 app.get("/terminals", (req, res) => {
-  res.json(myObject);
+  res.json(JSON.parse(fs.readFileSync("terminalList.json")));
 });
-// app.use((req, res, next) => {
-//   res.json(myObject);
-// });
+app.get("/login", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("login.json")));
+});
+app.get("/shifts", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("shifts.json")));
+});
 
 module.exports = app;
