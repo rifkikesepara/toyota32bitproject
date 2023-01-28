@@ -6,15 +6,14 @@ export default function Terminals() {
   const [terminals, setTerminals] = React.useState([]);
 
   React.useEffect(() => {
-    axios
-      .get("http://192.168.1.8:3001/terminals")
-      .then((response) => {
-        setTerminals(response.data);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+    async function fetchData() {
+      const request = await axios.get("http://192.168.1.8:3001/terminals");
+      setTerminals(request.data);
+    }
 
-  console.log(terminals.data);
+    fetchData();
+  }, [terminals]);
+
   return (
     <div className="container">
       <table>

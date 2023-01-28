@@ -4,8 +4,8 @@ import "../Pages/Terminal.css";
 export default function Header() {
   return (
     <nav className="nav">
-      <h1>Araç Kalite Kontrol</h1>
-      <section>
+      <h1 className="nav-header">Araç Kalite Kontrol</h1>
+      <div className="menu-nav">
         <a href="/terminals" className="menu">
           Anasayfa
         </a>
@@ -15,7 +15,7 @@ export default function Header() {
         <a href="/terminals" className="menu">
           İletişim
         </a>
-      </section>
+      </div>
     </nav>
   );
 }
