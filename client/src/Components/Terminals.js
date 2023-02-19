@@ -4,10 +4,11 @@ import "../Pages/Terminal.css";
 
 export default function Terminals() {
   const [terminals, setTerminals] = React.useState([]);
+  let i = 0;
 
   React.useEffect(() => {
     async function fetchData() {
-      const request = await axios.get("http://192.168.1.8:3001/terminals");
+      const request = await axios.get("http://192.168.1.33:3001/terminals");
       setTerminals(request.data);
     }
 
@@ -28,23 +29,31 @@ export default function Terminals() {
         </tr>
 
         {terminals.data &&
-          terminals.data.map((prevData) => (
-            <tr>
-              <td>
-                ({prevData.shopCode}) {prevData.depName}
-              </td>
-              <td className="filters">
-                {prevData.filterBaseds.map((filterData) => (
-                  <a
-                    href={`terminal/${prevData.depCode}/${filterData.filterCode}`}
-                  >
-                    {filterData.linkCount != 1 && <b>{filterData.linkCount}</b>}
-                    <td>{filterData.filterCode}</td>
-                  </a>
-                ))}
-              </td>
-            </tr>
-          ))}
+          terminals.data.map((prevData) => {
+            i++;
+            return (
+              <tr>
+                <td style={i % 2 == 0 ? { background: "#d8aa36" } : {}}>
+                  ({prevData.shopCode}) {prevData.depName}
+                </td>
+                <td
+                  className="filters"
+                  style={i % 2 == 0 ? { background: "#d8aa36" } : {}}
+                >
+                  {prevData.filterBaseds.map((filterData) => (
+                    <a
+                      href={`terminal/${prevData.depCode}/${filterData.filterCode}`}
+                    >
+                      {filterData.linkCount != 1 && (
+                        <b>{filterData.linkCount}</b>
+                      )}
+                      <td>{filterData.filterCode}</td>
+                    </a>
+                  ))}
+                </td>
+              </tr>
+            );
+          })}
       </table>
     </div>
   );

@@ -4,6 +4,7 @@ import TerminalSelect from "./Pages/TerminalSelect";
 import Error from "./Pages/Error";
 import LogIN from "./Pages/LogIn";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import VirtualKeyboard from "./Components/VirtualKeyboard";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,11 @@ const router = createBrowserRouter([
   {
     path: "terminal/:depCode/:filterCode",
     element: <LogIN></LogIN>,
+    errorElement: <Error></Error>,
+  },
+  {
+    path: "/keyboard",
+    element: <VirtualKeyboard></VirtualKeyboard>,
     errorElement: <Error></Error>,
   },
   {
