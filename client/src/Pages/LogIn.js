@@ -11,29 +11,30 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Typography,
+  Alert,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { useParams, Navigate } from "react-router-dom";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 import VirtualKeyboard from "../Components/VirtualKeyboard";
 
 export default function LogIN() {
   const [depName, setDepName] = useState("");
   const [terminalList, setTerminalList] = React.useState([]);
-  const [terminals, setTerminals] = React.useState([]);
   const [count, setCount] = React.useState(0);
   const [shifts, setShifts] = React.useState([]);
   const [date, setDate] = React.useState(new Date());
-  const [refs, setRefs] = useState([createRef(null)]);
+  const [refs] = useState([createRef(null)]);
   const [selectedRefa, setSelectedRef] = useState(1);
-  const [assyno, setAssyNo] = useState(123);
 
   const [inputName, setInputName] = useState("default");
   const [inputs, setInputs] = useState({});
+  const [logged, setLogged] = useState(2);
+  const [loading, setLoading] = useState(false);
   const keyboard = useRef();
 
   const getInputValue = (inputName) => {
@@ -53,19 +54,19 @@ export default function LogIN() {
     keyboard.current.setInput(inputVal);
   };
 
-  const [user, setUser] = useState({
+  const [user] = useState({
     sicilno: 321,
     password: 12345,
     assembleno: 770,
   });
 
-  const validationSchema = yup.object({
-    email: yup.string("Enter your a terminal").required("Terminal is required"),
-    password: yup
-      .string("Enter your password")
-      .min(8, "Password should be of minimum 8 characters length")
-      .required("Password is required"),
-  });
+  // const validationSchema = yup.object({
+  //   email: yup.string("Enter your a terminal").required("Terminal is required"),
+  //   password: yup
+  //     .string("Enter your password")
+  //     .min(8, "Password should be of minimum 8 characters length")
+  //     .required("Password is required"),
+  // });
 
   function checkUser(values) {
     if (values.sicilno == user.sicilno) {
@@ -77,7 +78,6 @@ export default function LogIN() {
     }
     return false;
   }
-
   const formik = useFormik({
     initialValues: {
       terminal: 82842,
@@ -88,10 +88,17 @@ export default function LogIN() {
       date: new Date(),
     },
     onSubmit: (values) => {
+      setLoading(true);
       let a = checkUser(values);
-      if (a) alert("User exitst");
-      else alert("User does not exist");
-      alert(JSON.stringify(values, null, 6));
+      if (a) {
+        // alert("User exitst");
+        setLogged(1);
+        setLoading(true);
+      } else {
+        setLogged(0);
+        // alert("User does not exist");
+      }
+      // alert(JSON.stringify(values, null, 6));
     },
   });
 
@@ -117,30 +124,28 @@ export default function LogIN() {
       refs[0].current.scrollIntoView({ behavior: "smooth" });
     }
     setSelectedRef(selectedRef);
-    console.log(selectedRef);
+    // console.log(selectedRef);
   };
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.33:3001/login")
+      .get("http://192.168.1.9:3001/login")
       .then((response) => {
         setTerminalList(response);
       })
       .catch((req, err) => console.log(err));
 
     axios
-      .get("http://192.168.1.33:3001/shifts")
+      .get("http://192.168.1.9:3001/shifts")
       .then((response) => {
         setShifts(response);
-        console.log(response.data);
       })
       .catch((req, err) => console.log(err));
 
     axios
-      .get("http://192.168.1.33:3001/terminals")
+      .get("http://192.168.1.9:3001/terminals")
       .then((response) => {
-        setTerminals(response);
-        console.log(response.data.data);
+        // console.log(response.data.data);
         response.data.data.map((prevdata) => {
           if (prevdata.depCode === params.depCode) {
             setDepName(prevdata.depName);
@@ -169,235 +174,297 @@ export default function LogIN() {
     }
   };
 
+  if (logged === 1 && loading) {
+    setTimeout(() => {
+      setLogged(8);
+    }, 1000);
+    setTimeout(() => {
+      console.log("5 saniye sonra");
+      setLogged(5);
+    }, 4000);
+  }
+
+  if (logged === 0 && loading) {
+    setTimeout(() => {
+      console.log("1 saniye sonra");
+      setLogged(7);
+      setLoading(false);
+    }, 1500);
+  }
+
   return (
-    <div className="login-container">
-      <form className="login-box" onSubmit={formik.handleSubmit}>
-        <div className="row" style={{ justifyContent: "center" }}>
-          <h1>{depName}</h1>
-        </div>
-        <div className="row">
-          {count === 1 && (
-            <div
-              style={{
-                position: "absolute",
-                left: "0",
-                zIndex: "100",
-                width: "100%",
-                height: "80px",
-              }}
-            ></div>
-          )}
-          <p>Terminal Listesi</p>
-          <Select
-            name="terminal"
-            id="select"
-            sx={{ m: 1, minWidth: 200, margin: 0 }}
-            value={formik.values.terminal}
-            inputProps={{ "aria-label": "Without label" }}
-            onChange={formik.handleChange}
+    <>
+      {logged == 5 && (
+        <Navigate
+          to={
+            "../terminal/defectentry/" +
+            params.depCode +
+            "/" +
+            params.filterCode +
+            "/3070725"
+          }
+        ></Navigate>
+      )}
+
+      {logged == 8 && (
+        <div className="alert">
+          <Alert
+            severity="success"
+            sx={{ minWidth: "40%", justifyContent: "center" }}
           >
-            <div ref={refs[0]} style={{ margin: "-10px" }}></div>
-            <Button
-              sx={{
-                position: "sticky",
-                top: "0px",
-                zIndex: "100",
-                minWidth: 200,
-                height: "50px",
-                fontSize: "40px",
-                textAlign: "center",
-              }}
-              onClick={() => scroll(10)}
-              variant="contained"
-            >
-              ↑
-            </Button>
-            {terminalList.data &&
-              terminalList.data.data.slice(0, count).map((prevdata) => {
-                refs.push(createRef(null));
-                i++;
-                return (
-                  <MenuItem ref={refs[i]} value={prevdata.termId}>
-                    {prevdata.termName}
-                  </MenuItem>
-                );
-              })}
+            Logged In
+          </Alert>
+        </div>
+      )}
+      {logged == 7 && (
+        <div className="alert">
+          <Alert
+            severity="error"
+            sx={{ minWidth: "40%", justifyContent: "center" }}
+          >
+            Invalid User
+          </Alert>
+        </div>
+      )}
 
-            <Button
-              sx={{
-                bottom: "0px",
-                position: "sticky",
-                zIndex: "100",
-                minWidth: 200,
-                height: "50px",
-                fontSize: "40px",
-                textAlign: "center",
-              }}
-              onClick={() => scroll(-10)}
-              variant="contained"
-            >
-              ↓
-            </Button>
-          </Select>
-        </div>
-        <div className="row">
-          <p>Sicil No</p>
-          <TextField
-            sx={{ minWidth: 200 }}
-            name="sicilno"
-            id="filled-basic"
-            variant="filled"
-            value={getInputValue("sicilno")}
-            onChange={onChangeInput}
-            onFocus={() => setInputName("sicilno")}
-          />
-        </div>
-        <div className="row">
-          <p>Şifre</p>
-          <TextField
-            name="password"
-            sx={{ minWidth: 200 }}
-            id="filled-basic"
-            variant="filled"
-            placeholder="***********"
-            value={getInputValue("password")}
-            onChange={onChangeInput}
-            onFocus={() => {
-              setInputName("password");
-            }}
-          />
-        </div>
-        <div className="row">
-          <p>Montaj NO</p>
-          <TextField
-            name="assembleno"
-            sx={{ minWidth: 200 }}
-            id="filled-basic"
-            variant="filled"
-            placeholder="123"
-            value={findAssyNo()}
-            inputProps={{
-              maxLength: 3,
-            }}
-            onChange={onChangeInput}
-            onFocus={() => setInputName("assembleno")}
-          />
-        </div>
-        <div
-          id="shift"
-          style={{
-            backgroundColor:
-              formik.values.shift == "M"
-                ? "#12a6eb"
-                : formik.values.shift == "B"
-                ? "#ffffff"
-                : formik.values.shift == "K" && "#ff0000",
-            border: formik.values.shift == "B" && "0.1px solid black",
-          }}
-        >
-          <p>Tarih</p>
-          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"tr"}>
-            <DatePicker
-              className="datepicker"
-              name="date"
-              value={formik.values.date}
-              onChange={(newValue) => {
-                formik.values.date = newValue;
-                setDate(newValue);
-              }}
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </LocalizationProvider>
-
-          <p>Vardiya</p>
-          <FormControl>
+      <div className="login-container">
+        <form className="login-box" onSubmit={formik.handleSubmit}>
+          <div className="row" style={{ justifyContent: "center" }}>
+            <h1>{depName}</h1>
+          </div>
+          <div className="row">
+            {count === 1 && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "0",
+                  zIndex: "100",
+                  width: "100%",
+                  height: "80px",
+                }}
+              ></div>
+            )}
+            <p>Terminal Listesi</p>
             <Select
-              name="shift"
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={formik.values.shift}
+              disabled={loading}
+              name="terminal"
+              id="select"
+              sx={{ m: 1, minWidth: "65%", margin: 0 }}
+              value={formik.values.terminal}
               inputProps={{ "aria-label": "Without label" }}
               onChange={formik.handleChange}
             >
-              {shifts.data &&
-                shifts.data.data.map((prevdata) => {
+              <div ref={refs[0]} style={{ margin: "-10px" }}></div>
+              <Button
+                sx={{
+                  position: "sticky",
+                  top: "0px",
+                  zIndex: "100",
+                  minWidth: "100%",
+                  height: "50px",
+                  fontSize: "40px",
+                  textAlign: "center",
+                }}
+                onClick={() => scroll(10)}
+                variant="contained"
+              >
+                ↑
+              </Button>
+              {terminalList.data &&
+                terminalList.data.data.slice(0, count).map((prevdata) => {
+                  refs.push(createRef(null));
+                  i++;
                   return (
-                    <MenuItem value={prevdata.shiftCode}>
-                      {prevdata.shiftCode}
+                    <MenuItem ref={refs[i]} value={prevdata.termId}>
+                      {prevdata.termName}
                     </MenuItem>
                   );
                 })}
-            </Select>
-          </FormControl>
-        </div>
-        <div id="buttons">
-          <Button
-            type="submit"
-            sx={{ width: "100%", marginRight: "40px", height: "70px" }}
-            variant="contained"
-          >
-            Kaydet
-          </Button>
-          <Button
-            color="error"
-            sx={{
-              height: "70px",
-              width: "100%",
-              marginLeft: "40px",
-            }}
-            href="/terminals"
-            variant="contained"
-          >
-            Kapat
-          </Button>
-        </div>
 
-        <Accordion
-          elevation={0}
-          sx={{
-            "&:before": {
-              display: "none",
-            },
-            "& .MuiAccordion-root": {
-              backgroundColor: "black",
-            },
-            width: "100%",
-            border: "0px solid black",
-          }}
-          disableGutters
-        >
-          <AccordionSummary
-            sx={{
-              "& .MuiAccordionSummary-content": {
-                display: "flex",
-                justifyContent: "center",
-              },
+              <Button
+                sx={{
+                  bottom: "0px",
+                  position: "sticky",
+                  zIndex: "100",
+                  minWidth: "100%",
+                  height: "50px",
+                  fontSize: "40px",
+                  textAlign: "center",
+                }}
+                onClick={() => scroll(-10)}
+                variant="contained"
+              >
+                ↓
+              </Button>
+            </Select>
+          </div>
+          <div className="row">
+            <p>Sicil No</p>
+            <TextField
+              disabled={loading}
+              autoComplete="off"
+              sx={{ minWidth: "65%" }}
+              name="sicilno"
+              id="outlined-size-normal"
+              value={getInputValue("sicilno")}
+              onChange={onChangeInput}
+              onFocus={() => setInputName("sicilno")}
+            />
+          </div>
+          <div className="row">
+            <p>Şifre</p>
+            <TextField
+              disabled={loading}
+              autoComplete="off"
+              name="password"
+              sx={{ minWidth: "65%" }}
+              id="filled-basic"
+              placeholder="***********"
+              value={getInputValue("password")}
+              onChange={onChangeInput}
+              onFocus={() => {
+                setInputName("password");
+              }}
+            />
+          </div>
+          <div className="row">
+            <p>Montaj NO</p>
+            <TextField
+              className="TextField"
+              name="assembleno"
+              sx={{ minWidth: "65%" }}
+              disabled={true}
+              variant="outlined"
+              placeholder="123"
+              value={findAssyNo()}
+              inputProps={{
+                maxLength: 3,
+              }}
+              onChange={onChangeInput}
+              onFocus={() => setInputName("assembleno")}
+              focused
+            />
+          </div>
+          <div
+            id="shift"
+            style={{
+              backgroundColor:
+                formik.values.shift == "M"
+                  ? "#12a6eb"
+                  : formik.values.shift == "B"
+                  ? "#ffffff"
+                  : formik.values.shift == "K" && "#ff0000",
+              border: formik.values.shift == "B" && "0.1px solid black",
             }}
           >
-            <KeyboardAltTwoToneIcon
-              onClick={() => console.log("tikladi")}
-              sx={{ fontSize: "50px", cursor: "pointer" }}
-            />
-          </AccordionSummary>
-          <AccordionDetails>
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
+            <p>Tarih</p>
+            <LocalizationProvider
+              dateAdapter={AdapterDayjs}
+              adapterLocale={"tr"}
+            >
+              <DatePicker
+                disabled={loading}
+                className="datepicker"
+                name="date"
+                value={formik.values.date}
+                onChange={(newValue) => {
+                  formik.values.date = newValue;
+                  setDate(newValue);
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
+
+            <p>Vardiya</p>
+            <FormControl>
+              <Select
+                disabled={loading}
+                name="shift"
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={formik.values.shift}
+                inputProps={{ "aria-label": "Without label" }}
+                onChange={formik.handleChange}
+              >
+                {shifts.data &&
+                  shifts.data.data.map((prevdata) => {
+                    return (
+                      <MenuItem value={prevdata.shiftCode}>
+                        {prevdata.shiftCode}
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+            </FormControl>
+          </div>
+          <div id="buttons">
+            <LoadingButton
+              loading={loading}
+              type="submit"
+              sx={{ width: "100%", height: "70px", margin: "15px" }}
+              variant="contained"
+            >
+              Kaydet
+            </LoadingButton>
+
+            <Button
+              disabled={loading}
+              color="error"
+              sx={{ height: "70px", width: "100%", margin: "15px" }}
+              href="/terminals"
+              variant="contained"
+            >
+              Kapat
+            </Button>
+          </div>
+
+          <Accordion
+            disabled={loading}
+            elevation={0}
+            sx={{
+              "&:before": {
+                display: "none",
+              },
+              "& .MuiAccordion-root": {
+                backgroundColor: "black",
+              },
+              width: "100%",
+              border: "0px solid black",
+            }}
+            disableGutters
+          >
+            <AccordionSummary
+              sx={{
+                "& .MuiAccordionSummary-content": {
+                  display: "flex",
+                  justifyContent: "center",
+                },
               }}
             >
-              <VirtualKeyboard
-                keyboard={keyboard}
-                setInputs={setInputs}
-                inputName={inputName}
-                setValues={formik.setValues}
-                values={formik.values}
-              ></VirtualKeyboard>
-            </div>
-          </AccordionDetails>
-        </Accordion>
-      </form>
-    </div>
+              <KeyboardAltTwoToneIcon
+                onClick={() => console.log("tikladi")}
+                sx={{ fontSize: "50px", cursor: "pointer" }}
+              />
+            </AccordionSummary>
+            <VirtualKeyboard
+              keyboard={keyboard}
+              setInputs={setInputs}
+              inputName={inputName}
+              setValues={formik.setValues}
+              values={formik.values}
+            />
+            <AccordionDetails>
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              ></div>
+            </AccordionDetails>
+          </Accordion>
+        </form>
+      </div>
+    </>
   );
 }

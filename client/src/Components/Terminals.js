@@ -8,7 +8,7 @@ export default function Terminals() {
 
   React.useEffect(() => {
     async function fetchData() {
-      const request = await axios.get("http://192.168.1.33:3001/terminals");
+      const request = await axios.get("http://192.168.1.9:3001/terminals");
       setTerminals(request.data);
     }
 

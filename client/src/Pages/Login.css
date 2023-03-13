@@ -61,6 +61,10 @@
     width: 100%;
     height: 100%;
   }
+
+  .TextField.Mui-disabled {
+    color: black;
+  }
 }
 
 @media only screen and (max-width: 1366px) {
@@ -106,18 +110,42 @@
     padding-top: 10px;
     padding-bottom: 10px;
     margin: 10px;
-    border-radius: 20px;
+    border-radius: 5px;
   }
+
   .datepicker {
-    width: 30%;
+    width: 50%;
   }
+
   #buttons {
     text-align: center;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
-    width: 90%;
+    justify-content: center;
+    width: 100%;
     height: 10%;
   }
+}
+
+@keyframes alert {
+  from {
+    top: -10px;
+    opacity: 0;
+  }
+  to {
+    opacity: 100%;
+    top: 30px;
+  }
+}
+
+.alert {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  top: 30px;
+  position: fixed;
+  z-index: 100;
+  animation-name: alert;
+  animation-duration: 1s;
 }

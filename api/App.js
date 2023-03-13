@@ -17,5 +17,11 @@ app.get("/login", (req, res) => {
 app.get("/shifts", (req, res) => {
   res.json(JSON.parse(fs.readFileSync("shifts.json")));
 });
+app.get("/header", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("header.json")));
+});
+app.get("/screen", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("screen.json")));
+});
 
 module.exports = app;
