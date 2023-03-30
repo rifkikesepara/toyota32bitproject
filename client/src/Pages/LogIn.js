@@ -129,21 +129,21 @@ export default function LogIN() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/login")
+      .get("http://192.168.1.9:3001/login")
       .then((response) => {
         setTerminalList(response);
       })
       .catch((req, err) => console.log(err));
 
     axios
-      .get("http://localhost:3001/shifts")
+      .get("http://192.168.1.9:3001/shifts")
       .then((response) => {
         setShifts(response);
       })
       .catch((req, err) => console.log(err));
 
     axios
-      .get("http://localhost:3001/terminals")
+      .get("http://192.168.1.9:3001/terminals")
       .then((response) => {
         // console.log(response.data.data);
         response.data.data.map((prevdata) => {

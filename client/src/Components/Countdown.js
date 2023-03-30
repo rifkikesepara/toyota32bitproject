@@ -36,6 +36,8 @@ export default function Countdown(props) {
           ":" +
           (seconds > 9 ? seconds : "0" + seconds)
       );
+
+      props.onTimesUp(total);
     }
   };
 
@@ -43,6 +45,19 @@ export default function Countdown(props) {
     // If you adjust it you should also need to
     // adjust the Endtime formula we are about
     // to code next
+    let { total, hours, minutes, seconds } = getTimeRemaining(e);
+    if (total >= 0) {
+      // update the timer
+      // check if less than 10 then we need to
+      // add '0' at the beginning of the variable
+      setTimer(
+        (hours > 9 ? hours : "0" + hours) +
+          ":" +
+          (minutes > 9 ? minutes : "0" + minutes) +
+          ":" +
+          (seconds > 9 ? seconds : "0" + seconds)
+      );
+    }
 
     // If you try to remove this line the
     // updating of timer Variable will be
@@ -71,7 +86,6 @@ export default function Countdown(props) {
   useEffect(() => {
     clearTimer(getDeadTime());
   }, []);
-
   // Another way to call the clearTimer() to start
   // the countdown is via action event from the
   // button first we create function to be called

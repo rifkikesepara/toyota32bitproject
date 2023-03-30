@@ -1,0 +1,9 @@
+.A:hover {
+  background-color: rgba(0, 0, 0, 0.329);
+  border-radius: 7px;
+}
+
+.C:hover {
+  border-radius: 7px;
+  background-color: rgba(0, 0, 0, 0.329);
+}

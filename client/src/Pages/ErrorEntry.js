@@ -1,23 +1,26 @@
 import {
+  Backdrop,
   Button,
   Checkbox,
   FormControlLabel,
   Skeleton,
   TextField,
 } from "@mui/material";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { createRef, useEffect, useRef, useState } from "react";
 import Countdown from "../Components/Countdown";
 import DefectEntryImage from "../Components/DefectEntryImage";
 import useGetData from "../Hooks/GetData";
 import car1 from "../Resources/car-repair.jpg";
 import "./ErrorEntry.css";
+import Alarm from "../Resources/alarm.ogg";
+import ReactCSSTransitionGroup from "react-transition-group";
 
 export default function ErrorEntry() {
-  const screenData = useGetData("http://192.168.1.9:3001/screen", 1000);
-  const headerData = useGetData("http://192.168.1.9:3001/header", 1000);
+  const [timesUp, setTimesUp] = useState(false);
+  const audioRef = useRef(null); //audio reference for playing the sound under a condition
 
-  console.log(headerData.data);
+  const screenData = useGetData("http://192.168.1.9:3001/screen", 1000); //getting image the data from the server
+  const headerData = useGetData("http://192.168.1.9:3001/header", 1000); //getting the header data from the server
 
   const buttonStyleRight = {
     borderRadius: 2,
@@ -47,8 +50,9 @@ export default function ErrorEntry() {
     },
   };
 
+  // if (audioRef.current != null) console.log(audioRef.current.paused);
   return (
-    <div className="error-container">
+    <div className={!timesUp ? "error-container" : "error-container-animated"}>
       <div className="error-box">
         <div className="row" style={{ width: "100%", margin: 0 }}>
           <div className="error-img-container">
@@ -69,6 +73,8 @@ export default function ErrorEntry() {
                   style={{
                     borderRight: "1px solid black",
                     borderLeft: "1px solid black",
+                    borderLeftStyle: "dashed",
+                    borderRightStyle: "dashed",
                   }}
                 >
                   <h1>MONTAJ NO</h1>
@@ -82,7 +88,10 @@ export default function ErrorEntry() {
                 </div>
                 <div
                   className="column"
-                  style={{ borderRight: "1px solid black" }}
+                  style={{
+                    borderRight: "1px solid black",
+                    borderRightStyle: "dashed",
+                  }}
                 >
                   <h1>BODY NO</h1>
                   <p>
@@ -97,11 +106,13 @@ export default function ErrorEntry() {
                   <div
                     className="column"
                     style={{
+                      marginLeft: "30px",
                       backgroundColor: headerData.data[0].bgColor,
-                      borderRight: "1px solid black",
+                      // borderRight: "1px solid black",
+                      // borderLeft: "1px solid black",
                     }}
                   >
-                    <h1>COLOR</h1>
+                    <h1>RENK</h1>
                     <p>{headerData.data[0].extCode}</p>
                   </div>
                 ) : (
@@ -115,7 +126,40 @@ export default function ErrorEntry() {
                 )}
               </div>
             </header>
-            <DefectEntryImage img={car1} />
+            {screenData.data ? (
+              <DefectEntryImage img={car1} data={screenData.data} />
+            ) : (
+              <Skeleton variant="rectangular" width={750} height={600} />
+            )}
+            <div
+              className="row"
+              style={{
+                width: "100%",
+                margin: 0,
+                height: "70px",
+                justifyContent: "left",
+                marginTop: "5px",
+              }}
+            >
+              <Button sx={buttonStyleBottom} variant="outlined">
+                ÇIKIŞ
+              </Button>
+              <Button sx={buttonStyleBottom} variant="outlined">
+                MODEL İLK RESMİ
+              </Button>
+              <Button sx={buttonStyleBottom} variant="outlined">
+                &larr; GERİ
+              </Button>
+              <Button sx={buttonStyleBottom} variant="outlined">
+                HATA LİSTESİ
+              </Button>
+              <Button sx={buttonStyleBottom} variant="outlined">
+                TEMİZLE
+              </Button>
+              <Button sx={buttonStyleBottom} variant="outlined">
+                BÜYÜK FONT
+              </Button>
+            </div>
           </div>
           <div
             style={{
@@ -153,7 +197,22 @@ export default function ErrorEntry() {
                       borderRadius: "10px",
                     }}
                   >
-                    <Countdown time={180} size={20} />
+                    {/* audio sound plays if the user does not enter an defect entry*/}
+                    <audio ref={audioRef} loop>
+                      <source src={Alarm}></source>
+                    </audio>
+
+                    <Countdown
+                      time={10000}
+                      size={20}
+                      onTimesUp={(t) => {
+                        if (t == 5000) {
+                          // console.log("bitti");
+                          setTimesUp(true);
+                          audioRef.current.play();
+                        }
+                      }}
+                    />
                   </div>
                 </>
               ) : (
@@ -162,7 +221,7 @@ export default function ErrorEntry() {
             </div>
             <div
               className="column"
-              style={{ height: "750px", justifyContent: "center" }}
+              style={{ height: "100%", justifyContent: "center" }}
             >
               <div
                 className="row"
@@ -177,18 +236,13 @@ export default function ErrorEntry() {
                   label="RDD"
                 />
               </div>
-              <Button
-                color="primary"
-                className="button"
-                sx={buttonStyleRight}
-                variant="outlined"
-              >
+              <Button disabled={true} sx={buttonStyleRight} variant="outlined">
                 HIZLI KAYDET
               </Button>
-              <Button sx={buttonStyleRight} variant="outlined">
+              <Button disabled={true} sx={buttonStyleRight} variant="outlined">
                 KAYDET VE GEÇ
               </Button>
-              <Button sx={buttonStyleRight} variant="outlined">
+              <Button disabled={true} sx={buttonStyleRight} variant="outlined">
                 HATA KAYIT
               </Button>
               <h1 style={{ marginTop: 4 }}>MONTAJ NO</h1>
@@ -216,34 +270,6 @@ export default function ErrorEntry() {
               </Button>
             </div>
           </div>
-        </div>
-        <div
-          className="row"
-          style={{
-            width: "100%",
-            margin: 0,
-            height: "100%",
-            justifyContent: "left",
-          }}
-        >
-          <Button sx={buttonStyleBottom} variant="outlined">
-            ÇIKIŞ
-          </Button>
-          <Button sx={buttonStyleBottom} variant="outlined">
-            MODEL İLK RESMİ
-          </Button>
-          <Button sx={buttonStyleBottom} variant="outlined">
-            &larr; GERİ
-          </Button>
-          <Button sx={buttonStyleBottom} variant="outlined">
-            HATA LİSTESİ
-          </Button>
-          <Button sx={buttonStyleBottom} variant="outlined">
-            TEMİZLE
-          </Button>
-          <Button sx={buttonStyleBottom} variant="outlined">
-            BÜYÜK FONT
-          </Button>
         </div>
       </div>
     </div>
