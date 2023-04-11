@@ -21,13 +21,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
 import VirtualKeyboard from "../Components/VirtualKeyboard";
+import useGetData from "../Hooks/GetData";
+import DefectSelect from "../Components/DefectSelect";
 
 export default function LogIN() {
   const [depName, setDepName] = useState("");
-  const [terminalList, setTerminalList] = React.useState([]);
   const [count, setCount] = React.useState(0);
-  const [shifts, setShifts] = React.useState([]);
-  const [date, setDate] = React.useState(new Date());
   const [refs] = useState([createRef(null)]);
   const [selectedRefa, setSelectedRef] = useState(1);
 
@@ -36,6 +35,9 @@ export default function LogIN() {
   const [logged, setLogged] = useState(2);
   const [loading, setLoading] = useState(false);
   const keyboard = useRef();
+
+  const terminalList = useGetData("http://localhost:3001/login", 500, () => {}); //getting terminals data
+  const shifts = useGetData("http://localhost:3001/shifts", 500, () => {}); //getting shift data
 
   const getInputValue = (inputName) => {
     return inputs[inputName] || "";
@@ -106,44 +108,30 @@ export default function LogIN() {
   let i = 0;
   let selectedRef = 0;
 
-  const scroll = (scrollOffset) => {
-    selectedRef = selectedRefa;
-    if (scrollOffset > 0 && selectedRef > 0) {
-      if (selectedRef >= count - 10) selectedRef -= 20;
-      else selectedRef -= 3;
-      refs[selectedRef].current.scrollIntoView({ behavior: "smooth" });
-    } else if (scrollOffset < 0 && selectedRef <= count) {
-      if (selectedRef >= count - 20) selectedRef = count;
-      else selectedRef += 3;
-      refs[selectedRef].current.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-    if (selectedRef <= 1) {
-      selectedRef = 0;
-      refs[0].current.scrollIntoView({ behavior: "smooth" });
-    }
-    setSelectedRef(selectedRef);
-    // console.log(selectedRef);
-  };
+  // const scroll = (scrollOffset) => {
+  //   selectedRef = selectedRefa;
+  //   if (scrollOffset > 0 && selectedRef > 0) {
+  //     if (selectedRef >= count - 10) selectedRef -= 20;
+  //     else selectedRef -= 3;
+  //     refs[selectedRef].current.scrollIntoView({ behavior: "smooth" });
+  //   } else if (scrollOffset < 0 && selectedRef <= count) {
+  //     if (selectedRef >= count - 20) selectedRef = count;
+  //     else selectedRef += 3;
+  //     refs[selectedRef].current.scrollIntoView({
+  //       behavior: "smooth",
+  //     });
+  //   }
+  //   if (selectedRef <= 1) {
+  //     selectedRef = 0;
+  //     refs[0].current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  //   setSelectedRef(selectedRef);
+  //   // console.log(selectedRef);
+  // };
 
   useEffect(() => {
     axios
-      .get("http://192.168.1.9:3001/login")
-      .then((response) => {
-        setTerminalList(response);
-      })
-      .catch((req, err) => console.log(err));
-
-    axios
-      .get("http://192.168.1.9:3001/shifts")
-      .then((response) => {
-        setShifts(response);
-      })
-      .catch((req, err) => console.log(err));
-
-    axios
-      .get("http://192.168.1.9:3001/terminals")
+      .get("http://localhost:3001/terminals")
       .then((response) => {
         // console.log(response.data.data);
         response.data.data.map((prevdata) => {
@@ -165,7 +153,7 @@ export default function LogIN() {
   const findAssyNo = () => {
     if (terminalList.data) {
       let assyno;
-      terminalList.data.data.map((data) => {
+      terminalList.data.map((data) => {
         if (data.termId === formik.values.terminal) {
           assyno = data.lastAssyNo;
         }
@@ -245,58 +233,14 @@ export default function LogIN() {
               ></div>
             )}
             <p>Terminal Listesi</p>
-            <Select
-              disabled={loading}
-              name="terminal"
-              id="select"
-              sx={{ m: 1, minWidth: "65%", margin: 0 }}
+            <DefectSelect
+              data={terminalList}
+              count={count}
               value={formik.values.terminal}
-              inputProps={{ "aria-label": "Without label" }}
               onChange={formik.handleChange}
-            >
-              <div ref={refs[0]} style={{ margin: "-10px" }}></div>
-              <Button
-                sx={{
-                  position: "sticky",
-                  top: "0px",
-                  zIndex: "100",
-                  minWidth: "100%",
-                  height: "50px",
-                  fontSize: "40px",
-                  textAlign: "center",
-                }}
-                onClick={() => scroll(10)}
-                variant="contained"
-              >
-                ↑
-              </Button>
-              {terminalList.data &&
-                terminalList.data.data.slice(0, count).map((prevdata) => {
-                  refs.push(createRef(null));
-                  i++;
-                  return (
-                    <MenuItem ref={refs[i]} value={prevdata.termId}>
-                      {prevdata.termName}
-                    </MenuItem>
-                  );
-                })}
-
-              <Button
-                sx={{
-                  bottom: "0px",
-                  position: "sticky",
-                  zIndex: "100",
-                  minWidth: "100%",
-                  height: "50px",
-                  fontSize: "40px",
-                  textAlign: "center",
-                }}
-                onClick={() => scroll(-10)}
-                variant="contained"
-              >
-                ↓
-              </Button>
-            </Select>
+              name="terminal"
+              menuItemName="termName"
+            />
           </div>
           <div className="row">
             <p>Sicil No</p>
@@ -369,7 +313,6 @@ export default function LogIN() {
                 value={formik.values.date}
                 onChange={(newValue) => {
                   formik.values.date = newValue;
-                  setDate(newValue);
                 }}
                 renderInput={(params) => <TextField {...params} />}
               />
@@ -387,7 +330,7 @@ export default function LogIN() {
                 onChange={formik.handleChange}
               >
                 {shifts.data &&
-                  shifts.data.data.map((prevdata) => {
+                  shifts.data.map((prevdata) => {
                     return (
                       <MenuItem value={prevdata.shiftCode}>
                         {prevdata.shiftCode}

@@ -1,19 +1,15 @@
 import React from "react";
 import axios from "axios";
 import "../Pages/Terminal.css";
+import useGetData from "../Hooks/GetData";
 
 export default function Terminals() {
-  const [terminals, setTerminals] = React.useState([]);
   let i = 0;
-
-  React.useEffect(() => {
-    async function fetchData() {
-      const request = await axios.get("http://192.168.1.9:3001/terminals");
-      setTerminals(request.data);
-    }
-
-    fetchData();
-  }, [terminals]);
+  const terminals = useGetData(
+    "http://localhost:3001/terminals",
+    1000,
+    () => {}
+  );
 
   return (
     <div className="container">

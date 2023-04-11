@@ -1,11 +1,26 @@
-import react from "react";
+import react, { useState } from "react";
 import LineTo from "react-lineto";
 import "./DefectEntryImage.css";
 
 export default function DefectEntryImage(props) {
   const data = props.data;
 
-  // console.log(props.data[0].defectButtonRecords);
+  // console.log(props.data);
+
+  const [images] = useState([
+    { id: 71835, data: "/screen" },
+    { id: 87897, data: "/defectselect" },
+  ]);
+
+  const clickHandle = (data) => {
+    images.map((prev) => {
+      if (prev.id == data.childPicID) {
+        props.setPicture(data.childPicID);
+        props.setData([]);
+      }
+    });
+  };
+
   return (
     <div
       style={{
@@ -45,6 +60,7 @@ export default function DefectEntryImage(props) {
                   backgroundColor: "#ffffff5b",
                   borderRadius: "7px",
                 }}
+                onClick={() => clickHandle(data)}
               >
                 <h2 style={{ fontSize: "10px" }}>{data.labelText}</h2>
               </div>

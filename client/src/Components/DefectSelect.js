@@ -1,11 +1,13 @@
-import { Button, Select } from "@mui/material";
+import { Button, Select, MenuItem } from "@mui/material";
 import { createRef, useState } from "react";
+import React from "react";
 
 export default function DefectSelect(props) {
   const [refs] = useState([createRef(null)]);
   let i = 0;
   let selectedRef = 0;
-
+  const count = props.count;
+  const [selectedRefa, setSelectedRef] = useState(1);
   const scroll = (scrollOffset) => {
     selectedRef = selectedRefa;
     if (scrollOffset > 0 && selectedRef > 0) {
@@ -53,7 +55,7 @@ export default function DefectSelect(props) {
       >
         ↑
       </Button>
-      {props.data &&
+      {props.data.data &&
         props.data.data.slice(0, count).map((prevdata) => {
           refs.push(createRef(null));
           i++;
