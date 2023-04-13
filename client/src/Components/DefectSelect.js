@@ -31,13 +31,14 @@ export default function DefectSelect(props) {
 
   return (
     <Select
+      open={props.open}
+      sx={props.sx}
       disabled={props.disabled}
       name={props.name}
       id="select"
-      sx={{ m: 1, minWidth: "65%", margin: 0 }}
       value={props.value}
-      inputProps={{ "aria-label": "Without label" }}
       onChange={props.onChange}
+      onClose={props.onClose}
     >
       <div ref={refs[0]} style={{ margin: "-10px" }}></div>
       <Button

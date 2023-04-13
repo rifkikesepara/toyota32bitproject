@@ -1,9 +1,15 @@
 import react, { useState } from "react";
 import LineTo from "react-lineto";
 import "./DefectEntryImage.css";
+import DefectSelect from "./DefectSelect";
+import { Menu, MenuItem } from "@mui/material";
 
 export default function DefectEntryImage(props) {
   const data = props.data;
+  const [selectDefect, setSelectDefect] = useState({
+    enabled: false,
+    value: 0,
+  });
 
   // console.log(props.data);
 
@@ -12,7 +18,9 @@ export default function DefectEntryImage(props) {
     { id: 87897, data: "/defectselect" },
   ]);
 
-  const clickHandle = (data) => {
+  const clickHandle = (e, data) => {
+    if (data.childPicID == 0)
+      setSelectDefect({ enabled: true, value: e.currentTarget });
     images.map((prev) => {
       if (prev.id == data.childPicID) {
         props.setPicture(data.childPicID);
@@ -60,10 +68,34 @@ export default function DefectEntryImage(props) {
                   backgroundColor: "#ffffff5b",
                   borderRadius: "7px",
                 }}
-                onClick={() => clickHandle(data)}
+                onClick={(event) => clickHandle(event, data)}
               >
                 <h2 style={{ fontSize: "10px" }}>{data.labelText}</h2>
               </div>
+              <Menu
+                id="basic-menu"
+                open={selectDefect.enabled}
+                anchorEl={selectDefect.value}
+                onClose={() => {
+                  setSelectDefect({ enabled: false, value: 0 });
+                }}
+                MenuListProps={{
+                  "aria-labelledby": "basic-button",
+                }}
+              >
+                {props.data &&
+                  props.data[0].arcDefects.map((defects) => {
+                    return (
+                      <MenuItem
+                        onClick={() => {
+                          setSelectDefect({ enabled: false, value: 0 });
+                        }}
+                      >
+                        {defects.defectName}
+                      </MenuItem>
+                    );
+                  })}
+              </Menu>
             </div>
             {data.lineX != -100 && (
               <div

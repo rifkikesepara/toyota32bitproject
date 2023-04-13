@@ -23,6 +23,7 @@ import { useFormik } from "formik";
 import VirtualKeyboard from "../Components/VirtualKeyboard";
 import useGetData from "../Hooks/GetData";
 import DefectSelect from "../Components/DefectSelect";
+import useGetDataOnce from "../Hooks/GetDataOnce";
 
 export default function LogIN() {
   const [depName, setDepName] = useState("");
@@ -36,8 +37,24 @@ export default function LogIN() {
   const [loading, setLoading] = useState(false);
   const keyboard = useRef();
 
-  const terminalList = useGetData("http://localhost:3001/login", 500, () => {}); //getting terminals data
-  const shifts = useGetData("http://localhost:3001/shifts", 500, () => {}); //getting shift data
+  const terminalList = useGetData("http://localhost:3001/login", 500); //getting terminals data
+  const shifts = useGetData("http://localhost:3001/shifts", 500); //getting shift data
+
+  useGetDataOnce("http://localhost:3001/terminals", 500, (response) => {
+    // console.log(response.data.data);
+    response.data.map((prevdata) => {
+      if (prevdata.depCode === params.depCode) {
+        setDepName(prevdata.depName);
+        prevdata.filterBaseds.map((filter) => {
+          if (filter.filterCode === params.filterCode) {
+            setCount(filter.linkCount);
+          }
+          return 0;
+        });
+        return 0;
+      }
+    });
+  });
 
   const getInputValue = (inputName) => {
     return inputs[inputName] || "";
@@ -128,27 +145,6 @@ export default function LogIN() {
   //   setSelectedRef(selectedRef);
   //   // console.log(selectedRef);
   // };
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/terminals")
-      .then((response) => {
-        // console.log(response.data.data);
-        response.data.data.map((prevdata) => {
-          if (prevdata.depCode === params.depCode) {
-            setDepName(prevdata.depName);
-            prevdata.filterBaseds.map((filter) => {
-              if (filter.filterCode === params.filterCode) {
-                setCount(filter.linkCount);
-              }
-              return 0;
-            });
-            return 0;
-          }
-        });
-      })
-      .catch((req, err) => console.log(err));
-  }, []);
 
   const findAssyNo = () => {
     if (terminalList.data) {

@@ -17,6 +17,7 @@ import useGetDataOnce from "../Hooks/GetDataOnce";
 import BigFont from "./BigFont";
 
 export default function ErrorEntry() {
+  let remainingTime = useRef(90000);
   const [timesUp, setTimesUp] = useState(false); //boolean to play audio after the time's up
   const [bigFont, setBigFont] = useState(false);
   const audioRef = useRef(null); //audio reference for playing the sound under a condition
@@ -69,7 +70,8 @@ export default function ErrorEntry() {
   };
 
   // if (audioRef.current != null) console.log(audioRef.current.paused);
-  if (bigFont) return <BigFont></BigFont>;
+  if (bigFont)
+    return <BigFont time={remainingTime} bigFont={setBigFont}></BigFont>;
   else {
     return (
       <div
@@ -272,9 +274,11 @@ export default function ErrorEntry() {
                       </audio>
 
                       <Countdown
-                        time={10000}
+                        time={remainingTime.current}
                         size={20}
                         onTimesUp={(t) => {
+                          // console.log(t / 1000);
+                          remainingTime.current = t / 1000;
                           if (t == 5000) {
                             // console.log("bitti");
                             setTimesUp(true);
@@ -337,7 +341,6 @@ export default function ErrorEntry() {
                       ? headerData.data[0].assyNo
                       : ""
                   }
-                  disabled
                 />
                 <Button sx={buttonStyleRight} variant="outlined">
                   ARA
