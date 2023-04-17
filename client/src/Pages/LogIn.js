@@ -12,6 +12,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Alert,
+  Skeleton,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
@@ -214,7 +215,11 @@ export default function LogIN() {
       <div className="login-container">
         <form className="login-box" onSubmit={formik.handleSubmit}>
           <div className="row" style={{ justifyContent: "center" }}>
-            <h1>{depName}</h1>
+            {depName ? (
+              <h1>{depName}</h1>
+            ) : (
+              <Skeleton variant="rectangular" width={300} height={40} />
+            )}
           </div>
           <div className="row">
             {count === 1 && (
@@ -230,7 +235,8 @@ export default function LogIN() {
             )}
             <p>Terminal Listesi</p>
             <DefectSelect
-              data={terminalList}
+              sx={{ width: "65%" }}
+              data={terminalList.data}
               count={count}
               value={formik.values.terminal}
               onChange={formik.handleChange}
@@ -364,19 +370,22 @@ export default function LogIN() {
               "&:before": {
                 display: "none",
               },
-              "& .MuiAccordion-root": {
-                backgroundColor: "black",
-              },
+              backgroundColor: "#ffc840",
               width: "100%",
-              border: "0px solid black",
+              borderRadius: "7px",
             }}
             disableGutters
+            square={true}
           >
             <AccordionSummary
               sx={{
                 "& .MuiAccordionSummary-content": {
                   display: "flex",
                   justifyContent: "center",
+                  backgroundColor: "#ffc840",
+                  padding: 0,
+                  margin: 0,
+                  width: "100%",
                 },
               }}
             >
@@ -392,7 +401,7 @@ export default function LogIN() {
               setValues={formik.setValues}
               values={formik.values}
             />
-            <AccordionDetails>
+            {/* <AccordionDetails>
               <div
                 style={{
                   width: "100%",
@@ -400,7 +409,7 @@ export default function LogIN() {
                   justifyContent: "center",
                 }}
               ></div>
-            </AccordionDetails>
+            </AccordionDetails> */}
           </Accordion>
         </form>
       </div>

@@ -10,8 +10,8 @@ export default function useGetData(url, ts, stateSet) {
         .get(url)
         .then((response) => {
           //   console.log(response.data);
-          if (stateSet) stateSet(response.data);
           setData(response.data);
+          if (stateSet) stateSet(response.data);
         })
         .catch((err) => console.log(err));
     }, ts);

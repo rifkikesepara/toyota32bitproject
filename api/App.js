@@ -32,4 +32,7 @@ app.get("/unapproved", (req, res) => {
 app.get("/vehicle", (req, res) => {
   res.json(JSON.parse(fs.readFileSync("vehicle.json")));
 });
+app.get("/errDetail", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errDetail.json")));
+});
 module.exports = app;

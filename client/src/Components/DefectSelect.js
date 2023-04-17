@@ -56,8 +56,8 @@ export default function DefectSelect(props) {
       >
         ↑
       </Button>
-      {props.data.data &&
-        props.data.data.slice(0, count).map((prevdata) => {
+      {props.data &&
+        props.data.slice(0, count).map((prevdata) => {
           refs.push(createRef(null));
           i++;
           return (

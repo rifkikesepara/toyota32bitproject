@@ -10,10 +10,14 @@
     justify-content: center;
     min-height: 100vh;
     align-items: center;
+    background-color: #bf9937;
   }
 
   .login-box {
-    border: 1px solid gray;
+    background-color: #ffc840;
+    border: 1px solid black;
+    box-shadow: 0px 0px 10px 2px #000000;
+    border-radius: 7px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -79,6 +83,7 @@
     justify-content: center;
     min-height: 100vh;
     align-items: center;
+    background-color: #ffc840;
   }
 
   .login-box {

@@ -1,9 +1,46 @@
+@keyframes border {
+  0% {
+    border-width: 40px;
+  }
+
+  100% {
+    border-width: 2px;
+  }
+}
+
+@keyframes hoverDefect {
+  0% {
+    background-color: #ffffff5b;
+    border-radius: 7px;
+  }
+
+  100% {
+    background-color: rgba(0, 0, 0, 0.329);
+    border-radius: 7px;
+  }
+}
+
+.A {
+  background-color: #ffffff5b;
+  border-radius: 7px;
+}
+.C {
+  background-color: #ffffff5b;
+  border-radius: 7px;
+}
+
 .A:hover {
+  animation: hoverDefect 0.3s;
   background-color: rgba(0, 0, 0, 0.329);
   border-radius: 7px;
 }
 
 .C:hover {
-  border-radius: 7px;
+  animation: hoverDefect 0.3s;
   background-color: rgba(0, 0, 0, 0.329);
+  border-radius: 7px;
+}
+
+.defectBorder {
+  animation: border 1s ease-in-out;
 }

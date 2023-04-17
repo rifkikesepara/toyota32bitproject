@@ -15,14 +15,15 @@ import "./ErrorEntry.css";
 import Alarm from "../Resources/alarm.ogg";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import BigFont from "./BigFont";
+import ErrorLog from "../Components/ErrorLog";
 
 export default function ErrorEntry() {
   let remainingTime = useRef(90000);
   const [timesUp, setTimesUp] = useState(false); //boolean to play audio after the time's up
   const [bigFont, setBigFont] = useState(false);
+  const [selectedDefect, setSelectedDefect] = useState();
+  const [errorLog, setErrorLog] = useState(false);
   const audioRef = useRef(null); //audio reference for playing the sound under a condition
-
-  const [screenData, setScreenData] = useState([]);
 
   const [picture, setPicture] = useState(71835);
   const [images] = useState([
@@ -38,6 +39,7 @@ export default function ErrorEntry() {
     return pic;
   }
 
+  const [screenData, setScreenData] = useState([]);
   useGetData(autoArrangewithID(), 1000, setScreenData); //getting image data from the server
   const headerData = useGetDataOnce("http://localhost:3001/header", 1000); //getting the header data from the server
 
@@ -176,6 +178,7 @@ export default function ErrorEntry() {
                         data={screenData.data}
                         setPicture={setPicture}
                         setData={setScreenData}
+                        setSelectedDefect={setSelectedDefect}
                       />
                     );
                   }
@@ -198,7 +201,11 @@ export default function ErrorEntry() {
                   marginTop: "5px",
                 }}
               >
-                <Button sx={buttonStyleBottom} variant="outlined">
+                <Button
+                  sx={buttonStyleBottom}
+                  variant="outlined"
+                  href="/terminals"
+                >
                   ÇIKIŞ
                 </Button>
                 <Button sx={buttonStyleBottom} variant="outlined">
@@ -211,6 +218,7 @@ export default function ErrorEntry() {
                     if (picture != 71835) {
                       setScreenData([]);
                       setPicture(screenData.data[0].motherPictureId);
+                      setSelectedDefect();
                     }
                   }}
                 >
@@ -310,26 +318,31 @@ export default function ErrorEntry() {
                   />
                 </div>
                 <Button
-                  disabled={true}
+                  disabled={selectedDefect ? false : true}
                   sx={buttonStyleRight}
                   variant="outlined"
                 >
                   HIZLI KAYDET
                 </Button>
                 <Button
-                  disabled={true}
+                  disabled={selectedDefect ? false : true}
                   sx={buttonStyleRight}
                   variant="outlined"
                 >
                   KAYDET VE GEÇ
                 </Button>
                 <Button
-                  disabled={true}
+                  disabled={selectedDefect ? false : true}
                   sx={buttonStyleRight}
                   variant="outlined"
+                  onClick={() => {
+                    console.log("sett");
+                    setErrorLog(true);
+                  }}
                 >
                   HATA KAYIT
                 </Button>
+                <ErrorLog open={errorLog} openFunc={setErrorLog} />
                 <h1 style={{ marginTop: 4 }}>MONTAJ NO</h1>
                 <TextField
                   sx={{
@@ -357,6 +370,7 @@ export default function ErrorEntry() {
               </div>
             </div>
           </div>
+          <h2 style={{ margin: 0 }}>{selectedDefect}</h2>
         </div>
       </div>
     );
