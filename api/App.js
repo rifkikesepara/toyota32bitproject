@@ -35,4 +35,10 @@ app.get("/vehicle", (req, res) => {
 app.get("/errDetail", (req, res) => {
   res.json(JSON.parse(fs.readFileSync("errDetail.json")));
 });
+app.get("/errReason", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errReason.json")));
+});
+app.get("/errList", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errorList.json")));
+});
 module.exports = app;

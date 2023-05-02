@@ -16,21 +16,34 @@ import Alarm from "../Resources/alarm.ogg";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import BigFont from "./BigFont";
 import ErrorLog from "../Components/ErrorLog";
+import { Navigate, useParams } from "react-router-dom";
 
 export default function ErrorEntry() {
   let remainingTime = useRef(90000);
-  const [timesUp, setTimesUp] = useState(false); //boolean to play audio after the time's up
-  const [bigFont, setBigFont] = useState(false);
+  let params = useParams();
+
+  console.log(params.depCode);
+
+  const [booleans, setBooleans] = useState({
+    errorLog: false,
+    timesUp: false, //boolean to play audio after the time's up
+    bigFont: false, //boolean to switch bigfont mode
+    showErrorList: false, //boolean to navigate Error List page
+  });
+
+  console.log(booleans);
   const [selectedDefect, setSelectedDefect] = useState();
-  const [errorLog, setErrorLog] = useState(false);
   const audioRef = useRef(null); //audio reference for playing the sound under a condition
 
   const [picture, setPicture] = useState(71835);
+
+  //image's sources and ids
   const [images] = useState([
     { id: 71835, img: car1, data: "http://localhost:3001/screen" },
     { id: 87897, img: car2, data: "http://localhost:3001/defectselect" },
   ]);
 
+  //A function to adjust images with their id's
   function autoArrangewithID() {
     let pic;
     images.map((image) => {
@@ -43,41 +56,32 @@ export default function ErrorEntry() {
   useGetData(autoArrangewithID(), 1000, setScreenData); //getting image data from the server
   const headerData = useGetDataOnce("http://localhost:3001/header", 1000); //getting the header data from the server
 
-  const buttonStyleRight = {
-    borderRadius: 2,
-    minWidth: 250,
-    minHeight: 70,
-    borderColor: "black",
-    color: "black",
-    marginTop: 1,
-    "&:hover": {
+  //button styling function to customize button on the error entry panel
+  const buttonStyle = (width, height) => {
+    return {
+      borderRadius: 2,
+      width: width,
+      height: height,
       borderColor: "black",
-      boxShadow: "none",
-      backgroundColor: "#bf9937",
-    },
-  };
-
-  const buttonStyleBottom = {
-    borderRadius: 2,
-    width: 115,
-    minHeight: 70,
-    marginLeft: 1,
-    borderColor: "black",
-    color: "black",
-    "&:hover": {
-      borderColor: "black",
-      boxShadow: "none",
-      backgroundColor: "#bf9937",
-    },
+      color: "black",
+      // marginTop: 1,
+      "&:hover": {
+        borderColor: "black",
+        boxShadow: "none",
+        backgroundColor: "#bf9937",
+      },
+    };
   };
 
   // if (audioRef.current != null) console.log(audioRef.current.paused);
-  if (bigFont)
-    return <BigFont time={remainingTime} bigFont={setBigFont}></BigFont>;
+  if (booleans.bigFont)
+    return <BigFont time={remainingTime} bigFont={setBooleans}></BigFont>;
   else {
     return (
       <div
-        className={!timesUp ? "error-container" : "error-container-animated"}
+        className={
+          !booleans.timesUp ? "error-container" : "error-container-animated"
+        }
       >
         <div className="error-box">
           <div className="row" style={{ width: "100%", margin: 0 }}>
@@ -202,17 +206,20 @@ export default function ErrorEntry() {
                 }}
               >
                 <Button
-                  sx={buttonStyleBottom}
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                   variant="outlined"
                   href="/terminals"
                 >
                   ÇIKIŞ
                 </Button>
-                <Button sx={buttonStyleBottom} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
+                  variant="outlined"
+                >
                   MODEL İLK RESMİ
                 </Button>
                 <Button
-                  sx={buttonStyleBottom}
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                   variant="outlined"
                   onClick={() => {
                     if (picture != 71835) {
@@ -224,16 +231,26 @@ export default function ErrorEntry() {
                 >
                   &larr; GERİ
                 </Button>
-                <Button sx={buttonStyleBottom} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
+                  variant="outlined"
+                  onClick={() =>
+                    setBooleans({ ...booleans, showErrorList: true })
+                  }
+                  href={`/terminal/defcorrect/${params.depCode}/${params.filterCode}`}
+                >
                   HATA LİSTESİ
                 </Button>
-                <Button sx={buttonStyleBottom} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
+                  variant="outlined"
+                >
                   TEMİZLE
                 </Button>
                 <Button
-                  sx={buttonStyleBottom}
+                  sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                   variant="outlined"
-                  onClick={() => setBigFont(true)}
+                  onClick={() => setBooleans({ ...booleans, bigFont: true })}
                 >
                   BÜYÜK FONT
                 </Button>
@@ -289,7 +306,7 @@ export default function ErrorEntry() {
                           remainingTime.current = t / 1000;
                           if (t == 5000) {
                             // console.log("bitti");
-                            setTimesUp(true);
+                            setBooleans({ ...booleans, timesUp: true });
                             audioRef.current.play();
                           }
                         }}
@@ -319,30 +336,30 @@ export default function ErrorEntry() {
                 </div>
                 <Button
                   disabled={selectedDefect ? false : true}
-                  sx={buttonStyleRight}
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                   variant="outlined"
                 >
                   HIZLI KAYDET
                 </Button>
                 <Button
                   disabled={selectedDefect ? false : true}
-                  sx={buttonStyleRight}
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                   variant="outlined"
                 >
                   KAYDET VE GEÇ
                 </Button>
                 <Button
                   disabled={selectedDefect ? false : true}
-                  sx={buttonStyleRight}
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                   variant="outlined"
                   onClick={() => {
-                    console.log("sett");
-                    setErrorLog(true);
+                    setBooleans({ ...booleans, errorLog: true });
                   }}
                 >
                   HATA KAYIT
                 </Button>
-                <ErrorLog open={errorLog} openFunc={setErrorLog} />
+
+                <ErrorLog open={booleans.errorLog} openFunc={setBooleans} />
                 <h1 style={{ marginTop: 4 }}>MONTAJ NO</h1>
                 <TextField
                   sx={{
@@ -355,16 +372,28 @@ export default function ErrorEntry() {
                       : ""
                   }
                 />
-                <Button sx={buttonStyleRight} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
+                  variant="outlined"
+                >
                   ARA
                 </Button>
-                <Button sx={buttonStyleRight} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
+                  variant="outlined"
+                >
                   TERMINAL İLK RESMİ
                 </Button>
-                <Button sx={buttonStyleRight} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
+                  variant="outlined"
+                >
                   SIK GELEN HATA
                 </Button>
-                <Button sx={buttonStyleRight} variant="outlined">
+                <Button
+                  sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
+                  variant="outlined"
+                >
                   MANIFEST
                 </Button>
               </div>

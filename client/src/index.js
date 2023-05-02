@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import VirtualKeyboard from "./Components/VirtualKeyboard";
 import ErrorEntry from "./Pages/ErrorEntry";
 import Test from "./Pages/Test";
+import ErrorList from "./Pages/ErrorList";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
   {
     path: "terminal/defectentry/:depCode/:filterCode/:carID",
     element: <ErrorEntry></ErrorEntry>,
+    errorElement: <Error></Error>,
+  },
+  {
+    path: "terminal/defcorrect/:depCode/:filterCode",
+    element: <ErrorList></ErrorList>,
     errorElement: <Error></Error>,
   },
   {

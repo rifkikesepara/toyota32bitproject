@@ -1,21 +1,19 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export default function useGetDataOnce(url, ts, setState) {
+export default function useGetDataOnce(url, dependency, setState) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    setTimeout(() => {
-      axios
-        .get(url)
-        .then((response) => {
-          //   console.log(response.data);
-          if (setState) setState(response.data);
-          setData(response.data);
-        })
-        .catch((err) => console.log(err));
-    }, ts);
-  }, []);
+    axios
+      .get(url)
+      .then((response) => {
+        // console.log(response.data);
+        setData(response.data);
+        if (setState) setState(response.data);
+      })
+      .catch((err) => console.log(err));
+  }, [dependency]);
 
   return data;
 }

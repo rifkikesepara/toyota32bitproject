@@ -33,7 +33,7 @@ export default function BigFont(props) {
           top: 0,
           cursor: "pointer",
         }}
-        onClick={() => props.bigFont(false)}
+        onClick={() => props.bigFont({ ...props.bigFont, bigFont: false })}
       >
         <ArrowBackIcon
           style={{

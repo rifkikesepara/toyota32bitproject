@@ -126,27 +126,6 @@ export default function LogIN() {
   let i = 0;
   let selectedRef = 0;
 
-  // const scroll = (scrollOffset) => {
-  //   selectedRef = selectedRefa;
-  //   if (scrollOffset > 0 && selectedRef > 0) {
-  //     if (selectedRef >= count - 10) selectedRef -= 20;
-  //     else selectedRef -= 3;
-  //     refs[selectedRef].current.scrollIntoView({ behavior: "smooth" });
-  //   } else if (scrollOffset < 0 && selectedRef <= count) {
-  //     if (selectedRef >= count - 20) selectedRef = count;
-  //     else selectedRef += 3;
-  //     refs[selectedRef].current.scrollIntoView({
-  //       behavior: "smooth",
-  //     });
-  //   }
-  //   if (selectedRef <= 1) {
-  //     selectedRef = 0;
-  //     refs[0].current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  //   setSelectedRef(selectedRef);
-  //   // console.log(selectedRef);
-  // };
-
   const findAssyNo = () => {
     if (terminalList.data) {
       let assyno;

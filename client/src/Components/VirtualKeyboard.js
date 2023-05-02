@@ -13,7 +13,7 @@ export default function VirtualKeyboard(props) {
      * If we modify the same object, react will not trigger a re-render
      */
     props.setInputs({ ...inputs });
-    console.log(inputs[props.inputName]);
+    // console.log(inputs[props.inputName]);
     props.setValues({
       ...props.values,
       [props.inputName]: inputs[props.inputName],
