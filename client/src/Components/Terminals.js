@@ -1,15 +1,10 @@
 import React from "react";
-import axios from "axios";
 import "../Pages/Terminal.css";
 import useGetData from "../Hooks/GetData";
+import API from "../Resources/api.json";
 
 export default function Terminals() {
-  let i = 0;
-  const terminals = useGetData(
-    "http://localhost:3001/terminals",
-    1000,
-    () => {}
-  );
+  const terminals = useGetData(API.link + "/terminals", 1000, () => {}); //fetching the terminal's data from the api
 
   return (
     <div className="container">
@@ -25,27 +20,30 @@ export default function Terminals() {
         </tr>
 
         {terminals.data &&
-          terminals.data.map((prevData) => {
-            i++;
+          //iterating through every department's data in order to render rows of terminal table
+          terminals.data.map((Data, _index) => {
             return (
               <tr>
-                <td style={i % 2 == 0 ? { background: "#d8aa36" } : {}}>
-                  ({prevData.shopCode}) {prevData.depName}
+                <td style={_index % 2 == 1 ? { background: "#d8aa36" } : {}}>
+                  ({Data.shopCode}) {Data.depName}
                 </td>
                 <td
                   className="filters"
-                  style={i % 2 == 0 ? { background: "#d8aa36" } : {}}
+                  style={_index % 2 == 1 ? { background: "#d8aa36" } : {}}
                 >
-                  {prevData.filterBaseds.map((filterData) => (
-                    <a
-                      href={`terminal/${prevData.depCode}/${filterData.filterCode}`}
-                    >
-                      {filterData.linkCount != 1 && (
-                        <b>{filterData.linkCount}</b>
-                      )}
-                      <td>{filterData.filterCode}</td>
-                    </a>
-                  ))}
+                  {
+                    //iterating through every terminal according to their department and rendering them into suitable columns
+                    Data.filterBaseds.map((filterData) => (
+                      <a
+                        href={`terminal/${Data.depCode}/${filterData.filterCode}`} //navigating to the exclusive login page according to the selected department and terminal
+                      >
+                        {filterData.linkCount != 1 && (
+                          <b>{filterData.linkCount}</b>
+                        )}
+                        <td>{filterData.filterCode}</td>
+                      </a>
+                    ))
+                  }
                 </td>
               </tr>
             );

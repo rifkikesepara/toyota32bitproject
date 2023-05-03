@@ -23,8 +23,6 @@
   .simple-keyboard.myTheme1 {
     background-color: rgba(0, 0, 0, 0.8);
     border-radius: 0;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
   }
@@ -64,8 +62,6 @@
   .simple-keyboard.myTheme1 {
     background-color: rgba(0, 0, 0, 0.8);
     border-radius: 0;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
   }

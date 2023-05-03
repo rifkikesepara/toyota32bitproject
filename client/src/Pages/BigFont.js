@@ -3,11 +3,12 @@ import "../Pages/ErrorEntry.css";
 import useGetData from "../Hooks/GetData";
 import Countdown from "../Components/Countdown";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import API from "../Resources/api.json";
 
 export default function BigFont(props) {
-  const headerData = useGetData("http://localhost:3001/header", 1000);
-  const vehicleData = useGetData("http://localhost:3001/vehicle", 1000);
-  const unapproved = useGetData("http://localhost:3001/unapproved", 1000);
+  const headerData = useGetData(API.link + "/header", 1000);
+  const vehicleData = useGetData(API.link + "/vehicle", 1000);
+  const unapproved = useGetData(API.link + "/unapproved", 1000);
 
   return (
     <div

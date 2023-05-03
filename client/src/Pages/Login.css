@@ -10,7 +10,7 @@
     justify-content: center;
     min-height: 100vh;
     align-items: center;
-    background-color: #bf9937;
+    background-color: #ddaa29;
   }
 
   .login-box {
@@ -134,13 +134,16 @@
 }
 
 @keyframes alert {
-  from {
+  0% {
     top: -10px;
     opacity: 0;
   }
-  to {
+  25% {
     opacity: 100%;
     top: 30px;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -152,5 +155,10 @@
   position: fixed;
   z-index: 100;
   animation-name: alert;
-  animation-duration: 1s;
+  animation-duration: 4s;
+  opacity: 0;
+}
+
+.alert::before {
+  opacity: 100%;
 }

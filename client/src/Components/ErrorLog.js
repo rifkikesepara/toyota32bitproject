@@ -1,55 +1,24 @@
 import {
-  Accordion,
-  AccordionSummary,
   Button,
   Checkbox,
   Dialog,
   DialogContent,
-  DialogContentText,
   FormControlLabel,
-  TextField,
 } from "@mui/material";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import DefectSelect from "./DefectSelect";
 import useGetData from "../Hooks/GetData";
 import { useFormik } from "formik";
-import VirtualKeyboard from "./VirtualKeyboard";
-import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
+import API from "../Resources/api.json";
+import CustomTextField from "./CustomTextField";
 
 export default function ErrorLog(props) {
-  //-------------------Virtual Keyboard Stuff------------------------------------
-  const keyboard = useRef();
-  const [inputName, setInputName] = useState("default");
-  const [inputs, setInputs] = useState({});
-
-  const getInputValue = (inputName) => {
-    return inputs[inputName] || "";
-  };
-
-  const onChangeInput = (event) => {
-    const inputVal = event.target.value;
-
-    setInputs({
-      ...inputs,
-      [inputName]: inputVal,
-    });
-
-    formik.setValues({ ...formik.values, [inputName]: inputVal });
-
-    keyboard.current.setInput(inputVal);
-  };
-  //---------------------------------------------------------------------------
-
   const [dataFetched, setDataFetched] = useState(false);
-  const errDetail = useGetData(
-    "http://localhost:3001/errDetail",
-    1000,
-    (data) => {
-      setDataFetched(true);
-    }
-  );
+  const errDetail = useGetData(API.link + "/errDetail", 1000, (data) => {
+    setDataFetched(true);
+  });
 
-  const errReason = useGetData("http://localhost:3001/errReason", 1000);
+  const errReason = useGetData(API.link + "/errReason", 1000);
 
   const formik = useFormik({
     initialValues: {
@@ -72,6 +41,7 @@ export default function ErrorLog(props) {
       onClose={() => {
         props.openFunc({ ...props, errorLog: false });
       }}
+      sx={{ position: "absolute" }}
       open={props.open}
       fullWidth={true}
       maxWidth="xl"
@@ -242,13 +212,14 @@ export default function ErrorLog(props) {
               style={{ width: "100%", margin: 0, marginBlock: "5px" }}
             >
               <h2>Açıklama</h2>
-              <TextField
+              <CustomTextField
+                autoComplete="off"
                 name="explain"
-                sx={{ width: "80%" }}
-                onChange={onChangeInput}
+                width="80%"
                 placeholder="Örnek Açıklama"
-                onFocus={() => setInputName("explain")}
-                value={getInputValue("explain")}
+                setValues={formik.setValues}
+                values={formik.values}
+                keyboardSX={{ bottom: -10 }}
               />
             </div>
             <div
@@ -256,13 +227,13 @@ export default function ErrorLog(props) {
               style={{ width: "100%", margin: 0, marginBlock: "5px" }}
             >
               <h2 style={{ color: "red" }}>Yapılan İşlem*</h2>
-              <TextField
+              <CustomTextField
+                autoComplete="off"
                 name="process"
-                sx={{ width: "80%" }}
-                onChange={onChangeInput}
-                onFocus={() => setInputName("process")}
-                value={getInputValue("process")}
+                width="80%"
                 placeholder="Örnek İşlem"
+                setValues={formik.setValues}
+                values={formik.values}
               />
             </div>
             <div
@@ -290,43 +261,6 @@ export default function ErrorLog(props) {
                 onChange={formik.handleChange}
               />
             </div>
-            <Accordion
-              elevation={0}
-              sx={{
-                "&:before": {
-                  display: "none",
-                },
-                backgroundColor: "#ffc840",
-                width: "100%",
-                borderRadius: "7px",
-              }}
-              disableGutters
-              square={true}
-            >
-              <AccordionSummary
-                sx={{
-                  "& .MuiAccordionSummary-content": {
-                    display: "flex",
-                    justifyContent: "center",
-                    backgroundColor: "#ffc840",
-                    padding: 0,
-                    margin: 0,
-                    width: "100%",
-                  },
-                }}
-              >
-                <KeyboardAltTwoToneIcon
-                  sx={{ fontSize: "50px", cursor: "pointer" }}
-                />
-              </AccordionSummary>
-              <VirtualKeyboard
-                keyboard={keyboard}
-                setInputs={setInputs}
-                inputName={inputName}
-                setValues={formik.setValues}
-                values={formik.values}
-              />
-            </Accordion>
           </div>
         </form>
       </DialogContent>

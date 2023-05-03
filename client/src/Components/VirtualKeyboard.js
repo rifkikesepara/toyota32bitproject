@@ -1,23 +1,28 @@
-import { Button } from "@mui/material";
-import React, { useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Keyboard from "react-simple-keyboard";
 import "../Components/Keyboard.css";
 import "react-simple-keyboard/build/css/index.css";
 
 export default function VirtualKeyboard(props) {
+  const divRef = useRef();
   const [layoutName, setLayoutName] = useState("default");
-
   const onChangeAll = (inputs) => {
-    /**
-     * Here we spread the inputs into a new object
-     * If we modify the same object, react will not trigger a re-render
-     */
-    props.setInputs({ ...inputs });
-    // console.log(inputs[props.inputName]);
+    if (props.onChange) props.onChange(inputs);
+    // props.setValues({
+    //   ...props.values,
+    //   [props.inputName]: props.inputRef.current + inputs[props.inputName],
+    // });
     props.setValues({
       ...props.values,
       [props.inputName]: inputs[props.inputName],
     });
+    // props.inputRef.current = inputs[props.inputName];
+    /**
+     * Here we spread the inputs into a new object
+     * If we modify the same object, react will not trigger a re-render
+     */
+    // console.log(inputs[props.inputName]);
+
     // console.log("Inputs changed", inputs);
   };
 
@@ -27,31 +32,32 @@ export default function VirtualKeyboard(props) {
   };
 
   const onKeyPress = (button) => {
-    // console.log("Button pressed", button);
-
+    divRef.current.focus();
     /**
      * If you want to handle the shift and caps lock buttons
      */
     if (button === "{shift}" || button === "{lock}") handleShift();
   };
 
+  useEffect(() => {
+    props.keyboard.current.setInput(props.inputRef.current);
+  }, []);
+
   return (
-    <>
-      {/* <input
-        id="firstName"
-        value={getInputValue("firstName")}
-        onFocus={() => setInputName("firstName")}
-        placeholder={"First Name"}
-        onChange={onChangeInput}
-      />
-      <input
-        id="lastName"
-        value={getInputValue("lastName")}
-        onFocus={() => setInputName("lastName")}
-        placeholder={"Last Name"}
-        onChange={onChangeInput}
-      /> */}
+    <div
+      ref={divRef}
+      style={{ ...props.style }}
+      onBlur={() => {
+        props.onBlur();
+        props.inputRef.current = props.values[props.inputName];
+      }}
+      tabIndex={100}
+    >
       <Keyboard
+        onInit={() => {
+          divRef.current.focus();
+        }}
+        // disableca
         keyboardRef={(r) => (props.keyboard.current = r)}
         inputName={props.inputName}
         layoutName={layoutName}
@@ -63,6 +69,6 @@ export default function VirtualKeyboard(props) {
         preventMouseDownDefault={true}
         autoUseTouchEvents={true}
       />
-    </>
+    </div>
   );
 }

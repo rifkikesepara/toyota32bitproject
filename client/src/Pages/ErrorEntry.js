@@ -17,6 +17,7 @@ import useGetDataOnce from "../Hooks/GetDataOnce";
 import BigFont from "./BigFont";
 import ErrorLog from "../Components/ErrorLog";
 import { Navigate, useParams } from "react-router-dom";
+import API from "../Resources/api.json";
 
 export default function ErrorEntry() {
   let remainingTime = useRef(90000);
@@ -39,8 +40,8 @@ export default function ErrorEntry() {
 
   //image's sources and ids
   const [images] = useState([
-    { id: 71835, img: car1, data: "http://localhost:3001/screen" },
-    { id: 87897, img: car2, data: "http://localhost:3001/defectselect" },
+    { id: 71835, img: car1, data: API.link + "/screen" },
+    { id: 87897, img: car2, data: API.link + "/defectselect" },
   ]);
 
   //A function to adjust images with their id's
@@ -54,7 +55,7 @@ export default function ErrorEntry() {
 
   const [screenData, setScreenData] = useState([]);
   useGetData(autoArrangewithID(), 1000, setScreenData); //getting image data from the server
-  const headerData = useGetDataOnce("http://localhost:3001/header", 1000); //getting the header data from the server
+  const headerData = useGetDataOnce(API.link + "/header", 1000); //getting the header data from the server
 
   //button styling function to customize button on the error entry panel
   const buttonStyle = (width, height) => {

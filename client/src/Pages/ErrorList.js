@@ -16,6 +16,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ArrowIcon from "@mui/icons-material/ArrowForwardIos";
 import { useParams } from "react-router-dom";
+import API from "../Resources/api.json";
+import CustomTextField from "../Components/CustomTextField";
 
 export default function ErrorList() {
   const tableRef = useRef(null);
@@ -329,7 +331,7 @@ export default function ErrorList() {
 
   const [errorList, setErrorList] = useState([]);
   const [filteredErrorList, setFilteredErrorList] = useState([]);
-  const [filterWord, setFilterWord] = useState("");
+  const [filterWord, setFilterWord] = useState({ filter: "" });
   const [bool, setbool] = useState({ refresh: false, dataFetched: false });
 
   const buttonStyle = (color) => {
@@ -361,7 +363,7 @@ export default function ErrorList() {
   };
 
   let params = useParams();
-  useGetDataOnce("http://localhost:3001/errList", bool.dataFetched, (data) => {
+  useGetDataOnce(API.link + "/errList", bool.refresh, (data) => {
     const depcodeErrorList = data.data[0].defectList.filter((data) => {
       return data.depCode == params.depCode;
     });
@@ -435,7 +437,7 @@ export default function ErrorList() {
             >
               <TextField
                 sx={{
-                  width: 200,
+                  minWidth: 200,
                   backgroundColor: "white",
                   borderRadius: "5px",
                   border: "1px solid black",
@@ -466,18 +468,20 @@ export default function ErrorList() {
               className="row"
               style={{ margin: 0, width: "75%", justifyContent: "right" }}
             >
-              <TextField
+              <CustomTextField
                 sx={{
                   width: 200,
                   backgroundColor: "white",
                   borderRadius: "5px",
                   border: "1px solid black",
                 }}
+                width={200}
                 onChange={(event) => {
-                  if (event.target.value == "")
-                    filterData(event.target.value, "bodyNo");
-                  setFilterWord(event.target.value);
+                  if (filterWord.filter.length <= 1) filterData("", "bodyNo");
                 }}
+                name="filter"
+                setValues={setFilterWord}
+                values={filterWord}
               />
               <Button
                 variant="contained"
@@ -488,8 +492,8 @@ export default function ErrorList() {
                   marginInline: "5px",
                 }}
                 onClick={() => {
-                  //   setbool(!bool);
-                  filterData(filterWord, "bodyNo");
+                  scrollerIndex.current = 0;
+                  filterData(filterWord.filter, "bodyNo");
                 }}
               >
                 ARA
@@ -620,12 +624,13 @@ export default function ErrorList() {
             }}
             onClick={async () => {
               setbool({ ...bool, refresh: !bool.refresh });
+
               setTimeout(() => {
                 tableRef.current.scrollToIndex({
                   index: scrollerIndex.current,
                   behavior: "smooth",
                 });
-              }, 100);
+              }, 300);
             }}
           >
             <RefreshIcon sx={{ fontSize: "50px" }} />
