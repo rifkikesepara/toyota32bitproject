@@ -11,6 +11,7 @@ import useGetData from "../Hooks/GetData";
 import { useFormik } from "formik";
 import API from "../Resources/api.json";
 import CustomTextField from "./CustomTextField";
+import axios from "axios";
 
 export default function ErrorLog(props) {
   const [dataFetched, setDataFetched] = useState(false);
@@ -31,6 +32,9 @@ export default function ErrorLog(props) {
       process: "",
     },
     onSubmit: (values) => {
+      axios
+        .post(API.link + "/errList/change", { name: "efe" })
+        .catch((err) => console.log(err));
       console.log(values);
     },
   });
@@ -41,10 +45,11 @@ export default function ErrorLog(props) {
       onClose={() => {
         props.openFunc({ ...props, errorLog: false });
       }}
-      sx={{ position: "absolute" }}
+      sx={{ overflow: "hidden" }}
       open={props.open}
       fullWidth={true}
       maxWidth="xl"
+      PaperProps={{ sx: { overflow: "visible" } }}
     >
       <DialogContent sx={{ backgroundColor: "#ffc840" }}>
         <form onSubmit={formik.handleSubmit}>
@@ -163,6 +168,9 @@ export default function ErrorLog(props) {
                 }}
                 variant="contained"
                 type="submit"
+                onClick={() => {
+                  props.isSaved(true);
+                }}
               >
                 KAYDET
               </Button>
@@ -219,7 +227,8 @@ export default function ErrorLog(props) {
                 placeholder="Örnek Açıklama"
                 setValues={formik.setValues}
                 values={formik.values}
-                keyboardSX={{ bottom: -10 }}
+                keyboardSX={{ bottom: -350 }}
+                iconPosition="left"
               />
             </div>
             <div
@@ -234,6 +243,8 @@ export default function ErrorLog(props) {
                 placeholder="Örnek İşlem"
                 setValues={formik.setValues}
                 values={formik.values}
+                keyboardSX={{ bottom: -350 }}
+                iconPosition="left"
               />
             </div>
             <div

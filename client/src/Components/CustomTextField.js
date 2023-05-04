@@ -38,7 +38,14 @@ export default function CustomTextField(props) {
           <div
             style={{
               position: "absolute",
-              right: 0,
+              left:
+                props.iconPosition == "left"
+                  ? -50
+                  : props.iconPosition == "leftInner" && 0,
+              right:
+                props.iconPosition == "right"
+                  ? -50
+                  : props.iconPosition == "rightInner" && 0,
               top: 0,
               cursor: "pointer",
               zIndex: "100",
@@ -56,11 +63,6 @@ export default function CustomTextField(props) {
         <VirtualKeyboard
           onBlur={() => setBools({ ...bools, showKeyboard: false })}
           style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            zIndex: "1000",
             display: bools.showKeyboard ? "flex" : "none",
             ...props.keyboardSX,
           }}

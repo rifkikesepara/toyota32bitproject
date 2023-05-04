@@ -45,6 +45,7 @@ export default function VirtualKeyboard(props) {
 
   return (
     <div
+      className="keyboard-container"
       ref={divRef}
       style={{ ...props.style }}
       onBlur={() => {
@@ -57,7 +58,6 @@ export default function VirtualKeyboard(props) {
         onInit={() => {
           divRef.current.focus();
         }}
-        // disableca
         keyboardRef={(r) => (props.keyboard.current = r)}
         inputName={props.inputName}
         layoutName={layoutName}
@@ -69,6 +69,19 @@ export default function VirtualKeyboard(props) {
         preventMouseDownDefault={true}
         autoUseTouchEvents={true}
       />
+      <div
+        style={{
+          position: "absolute",
+          right: 10,
+          top: "-11%",
+          width: "auto",
+          backgroundColor: "white",
+          borderRadius: "5px",
+          border: "0.5px solid black",
+        }}
+      >
+        <h1>{props.values[props.inputName]}</h1>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import "./Login.css";
 import {
   Select,
@@ -6,24 +6,21 @@ import {
   FormControl,
   TextField,
   Button,
-  Accordion,
-  AccordionSummary,
   Alert,
   Skeleton,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
-import VirtualKeyboard from "../Components/VirtualKeyboard";
 import useGetData from "../Hooks/GetData";
 import DefectSelect from "../Components/DefectSelect";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
+import CustomAlert from "../Components/CustomAlert";
 
 export default function LogIN() {
   const [depName, setDepName] = useState("");
@@ -139,24 +136,14 @@ export default function LogIN() {
       )}
 
       {variables.logged == true ? (
-        <div className="alert">
-          <Alert
-            severity="success"
-            sx={{ minWidth: "40%", justifyContent: "center" }}
-          >
-            Logged In
-          </Alert>
-        </div>
+        <CustomAlert type="success" message="Giriş yapıldı" />
       ) : (
         variables.logged == false && (
-          <div className="alert" key={variables.key}>
-            <Alert
-              severity="error"
-              sx={{ minWidth: "40%", justifyContent: "center" }}
-            >
-              Invalid User
-            </Alert>
-          </div>
+          <CustomAlert
+            type="error"
+            key={variables.key}
+            message="Geçersiz kullanıcı"
+          />
         )
       )}
 
@@ -172,8 +159,9 @@ export default function LogIN() {
           <div className="row">
             <p>Terminal Listesi</p>
             <DefectSelect
-              disabled={count == 1 ? true : false}
-              sx={{ width: "65%" }}
+              scrollPosition="left"
+              disabled={count == 1 || variables.loading ? true : false}
+              sx={{ width: "65%", color: "black" }}
               data={terminalList.data}
               count={count}
               value={formik.values.terminal}
@@ -192,6 +180,7 @@ export default function LogIN() {
               id="outlined-size-normal"
               setValues={formik.setValues}
               values={formik.values}
+              iconPosition="rightInner"
             />
           </div>
           <div className="row">
@@ -202,9 +191,9 @@ export default function LogIN() {
               width="65%"
               name="password"
               id="outlined-size-normal"
-              onFocus={() => {}}
               setValues={formik.setValues}
               values={formik.values}
+              iconPosition="rightInner"
             />
           </div>
           <div className="row">

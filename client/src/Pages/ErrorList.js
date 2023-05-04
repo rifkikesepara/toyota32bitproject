@@ -364,9 +364,10 @@ export default function ErrorList() {
 
   let params = useParams();
   useGetDataOnce(API.link + "/errList", bool.refresh, (data) => {
-    const depcodeErrorList = data.data[0].defectList.filter((data) => {
-      return data.depCode == params.depCode;
-    });
+    // const depcodeErrorList = data.data[0].defectList.filter((data) => {
+    //   return data.depCode == params.depCode;
+    // });
+    const depcodeErrorList = data.data[0].defectList;
     setErrorList(depcodeErrorList);
     setFilteredErrorList(depcodeErrorList);
     setbool({ ...bool, dataFetched: true });
@@ -380,6 +381,7 @@ export default function ErrorList() {
         >
           {filteredErrorList.length ? (
             <TableVirtuoso
+              style={{ backgroundColor: "#ffc840" }}
               ref={tableRef}
               data={errorList && filteredErrorList}
               components={VirtuosoTableComponents}
@@ -482,6 +484,7 @@ export default function ErrorList() {
                 name="filter"
                 setValues={setFilterWord}
                 values={filterWord}
+                iconPosition="rightInner"
               />
               <Button
                 variant="contained"
