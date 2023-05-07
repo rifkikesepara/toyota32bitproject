@@ -18,6 +18,7 @@ export default function CustomTextField(props) {
     <>
       <div style={{ minWidth: props.width, position: "relative" }}>
         <TextField
+          placeholder={props.placeholder}
           disabled={props.disabled}
           autoComplete={props.autoComplete}
           sx={{ ...props.sx, width: "100%" }}
@@ -66,6 +67,7 @@ export default function CustomTextField(props) {
             display: bools.showKeyboard ? "flex" : "none",
             ...props.keyboardSX,
           }}
+          width={props.keyboardWidth}
           keyboard={keyboard}
           inputName={props.name}
           setValues={props.setValues}

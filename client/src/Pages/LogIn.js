@@ -6,28 +6,34 @@ import {
   FormControl,
   TextField,
   Button,
-  Alert,
   Skeleton,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import {
+  DatePicker,
+  LocalizationProvider,
+  MobileDatePicker,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
 import useGetData from "../Hooks/GetData";
-import DefectSelect from "../Components/DefectSelect";
+import CustomSelect from "../Components/CustomSelect";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
-import CustomAlert from "../Components/CustomAlert";
+import useAlert from "../Hooks/useAlert";
+import { useTranslation } from "react-i18next";
 
 export default function LogIN() {
+  const { t } = useTranslation();
+  const { setAlert } = useAlert();
+
   const [depName, setDepName] = useState("");
   const [count, setCount] = React.useState(0);
   const [variables, setVariables] = useState({
     key: 0,
-    logged: "none",
     loading: false,
     navigate: false,
   });
@@ -36,8 +42,8 @@ export default function LogIN() {
   const shifts = useGetData(API.link + "/shifts", 500); //fetching shift data
 
   let params = useParams();
-  useGetDataOnce(API.link + "/terminals", 500, (response) => {
-    //iterating thorugh data to find the correct terminal that matches with the parameters that we get from the link
+  useGetDataOnce(API.link + "/terminals", true, (response) => {
+    //iterating thorugh data to find the correct department that matches with the parameters that we get from the link
     response.data.map((prevdata) => {
       if (prevdata.depCode === params.depCode) {
         setDepName(prevdata.depName); //setting the department name that matches with the correct terminal
@@ -76,6 +82,7 @@ export default function LogIN() {
     }
     return false;
   }
+
   const formik = useFormik({
     initialValues: {
       terminal: 82842,
@@ -86,12 +93,15 @@ export default function LogIN() {
       date: new Date(),
     },
     onSubmit: (values) => {
+      setVariables({ ...variables, loading: true });
       if (checkUser(values)) {
-        setVariables({ ...variables, loading: true, logged: true });
-        AlertFunction(true);
+        setAlert(t("loginAlert"), "success", 3000, () => {
+          setVariables({ ...variables, loading: true, navigate: true });
+        });
       } else {
-        setVariables({ ...variables, loading: true, logged: false });
-        AlertFunction(false);
+        setAlert(t("invalidUserAlert"), "error", 3000, () => {
+          setVariables({ ...variables, loading: false });
+        });
       }
     },
   });
@@ -108,22 +118,9 @@ export default function LogIN() {
     }
   };
 
-  const AlertFunction = (isLogged) => {
-    if (isLogged == true) {
-      setTimeout(() => {
-        setVariables({ ...variables, navigate: true });
-      }, 2000);
-    }
-    if (isLogged == false) {
-      setTimeout(() => {
-        setVariables({ ...variables, loading: false });
-      }, 3000);
-    }
-  };
-
   return (
     <>
-      {variables.navigate == true && (
+      {variables.navigate && (
         <Navigate
           to={
             "../terminal/defectentry/" +
@@ -133,18 +130,6 @@ export default function LogIN() {
             "/3070725"
           }
         />
-      )}
-
-      {variables.logged == true ? (
-        <CustomAlert type="success" message="Giriş yapıldı" />
-      ) : (
-        variables.logged == false && (
-          <CustomAlert
-            type="error"
-            key={variables.key}
-            message="Geçersiz kullanıcı"
-          />
-        )
       )}
 
       <div className="login-container">
@@ -157,9 +142,8 @@ export default function LogIN() {
             )}
           </div>
           <div className="row">
-            <p>Terminal Listesi</p>
-            <DefectSelect
-              scrollPosition="left"
+            <p>{t("terminalList")}</p>
+            <CustomSelect
               disabled={count == 1 || variables.loading ? true : false}
               sx={{ width: "65%", color: "black" }}
               data={terminalList.data}
@@ -171,7 +155,7 @@ export default function LogIN() {
             />
           </div>
           <div className="row">
-            <p>Sicil No</p>
+            <p>{t("regNumber")}</p>
             <CustomTextField
               disabled={variables.loading}
               autoComplete="off"
@@ -184,7 +168,7 @@ export default function LogIN() {
             />
           </div>
           <div className="row">
-            <p>Şifre</p>
+            <p>{t("password")}</p>
             <CustomTextField
               disabled={variables.loading}
               autoComplete="off"
@@ -197,7 +181,7 @@ export default function LogIN() {
             />
           </div>
           <div className="row">
-            <p>Montaj NO</p>
+            <p>{t("assemblyNo")}</p>
             <TextField
               className="TextField"
               name="assembleno"
@@ -223,12 +207,13 @@ export default function LogIN() {
               border: formik.values.shift == "B" && "0.1px solid black",
             }}
           >
-            <p>Tarih</p>
+            <p>{t("date")}</p>
             <LocalizationProvider
               dateAdapter={AdapterDayjs}
               adapterLocale={"tr"}
             >
-              <DatePicker
+              <MobileDatePicker
+                orientation="landscape"
                 disabled={variables.loading}
                 className="datepicker"
                 name="date"
@@ -240,7 +225,7 @@ export default function LogIN() {
               />
             </LocalizationProvider>
 
-            <p>Vardiya</p>
+            <p>{t("shift")}</p>
             <FormControl>
               <Select
                 disabled={variables.loading}
@@ -266,20 +251,30 @@ export default function LogIN() {
             <LoadingButton
               loading={variables.loading}
               type="submit"
-              sx={{ width: "100%", height: "70px", margin: "15px" }}
+              sx={{
+                width: "100%",
+                height: "70px",
+                margin: "15px",
+                fontSize: "20px",
+              }}
               variant="contained"
             >
-              Kaydet
+              {t("login")}
             </LoadingButton>
 
             <Button
               disabled={variables.loading}
               color="error"
-              sx={{ height: "70px", width: "100%", margin: "15px" }}
+              sx={{
+                height: "70px",
+                width: "100%",
+                margin: "15px",
+                fontSize: "20px",
+              }}
               href="/terminals"
               variant="contained"
             >
-              Kapat
+              {t("close")}
             </Button>
           </div>
         </form>

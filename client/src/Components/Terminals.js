@@ -2,20 +2,22 @@ import React from "react";
 import "../Pages/Terminal.css";
 import useGetData from "../Hooks/GetData";
 import API from "../Resources/api.json";
+import { useTranslation } from "react-i18next";
 
 export default function Terminals() {
+  const { t } = useTranslation();
   const terminals = useGetData(API.link + "/terminals", 1000, () => {}); //fetching the terminal's data from the api
 
   return (
     <div className="container">
       <table>
         <tr>
-          <th colSpan={3}>Tüm Terminaller</th>
+          <th colSpan={3}>{t("allTerminals").toUpperCase()}</th>
         </tr>
         <tr>
-          <th>Bölüm Bazında</th>
+          <th>{t("departments").toUpperCase()}</th>
           <th colSpan={2} style={{ width: "80%" }}>
-            Filtre Bazında
+            {t("filters").toUpperCase()}
           </th>
         </tr>
 

@@ -83,6 +83,18 @@
     height: auto;
   }
 
+  .error-container-animated {
+    background-color: #ffc840;
+    width: 100%;
+    min-height: 100vh;
+    min-width: 100vw;
+    height: auto;
+    animation-name: FadeTheBackground;
+    animation-duration: 2.5s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+
   .error-box {
     width: 100%;
     height: 100%;

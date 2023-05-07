@@ -5,8 +5,10 @@ import "react-simple-keyboard/build/css/index.css";
 
 export default function VirtualKeyboard(props) {
   const divRef = useRef();
+  const textAreaRef = useRef();
   const [layoutName, setLayoutName] = useState("default");
   const onChangeAll = (inputs) => {
+    textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
     if (props.onChange) props.onChange(inputs);
     // props.setValues({
     //   ...props.values,
@@ -44,43 +46,61 @@ export default function VirtualKeyboard(props) {
   }, []);
 
   return (
-    <div
-      className="keyboard-container"
-      ref={divRef}
-      style={{ ...props.style }}
-      onBlur={() => {
-        props.onBlur();
-        props.inputRef.current = props.values[props.inputName];
-      }}
-      tabIndex={100}
-    >
-      <Keyboard
-        onInit={() => {
-          divRef.current.focus();
-        }}
-        keyboardRef={(r) => (props.keyboard.current = r)}
-        inputName={props.inputName}
-        layoutName={layoutName}
-        onChangeAll={onChangeAll}
-        onKeyPress={onKeyPress}
-        theme={"hg-theme-default myTheme1"}
-        maxLength={props.inputName == "assembleno" ? 3 : 999}
-        physicalKeyboardHighlight={true}
-        preventMouseDownDefault={true}
-        autoUseTouchEvents={true}
-      />
+    <div className="keyboard-container" style={{ ...props.style }}>
       <div
+        ref={divRef}
+        onBlur={() => {
+          props.onBlur();
+          props.inputRef.current = props.values[props.inputName];
+        }}
+        tabIndex={100}
+        className="keyboard"
         style={{
-          position: "absolute",
-          right: 10,
-          top: "-11%",
-          width: "auto",
-          backgroundColor: "white",
-          borderRadius: "5px",
-          border: "0.5px solid black",
+          width: props.width,
+          display: "flex",
+          justifyContent: "center",
         }}
       >
-        <h1>{props.values[props.inputName]}</h1>
+        <textarea
+          ref={textAreaRef}
+          style={{
+            width: "100%",
+            resize: "none",
+            fontSize: "20px",
+            border: "none",
+            outline: "none",
+            overflowY: "hidden",
+            zIndex: "200",
+          }}
+          wrap="true"
+          value={props.values[props.inputName]}
+        />
+        <Keyboard
+          onInit={() => {
+            divRef.current.focus();
+          }}
+          keyboardRef={(r) => (props.keyboard.current = r)}
+          inputName={props.inputName}
+          layoutName={layoutName}
+          onChangeAll={onChangeAll}
+          onKeyPress={onKeyPress}
+          theme={"hg-theme-default myTheme1"}
+          maxLength={props.inputName == "assembleno" ? 3 : 999}
+          physicalKeyboardHighlight={true}
+          preventMouseDownDefault={true}
+          autoUseTouchEvents={true}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: "100%",
+            top: "-12%",
+            backgroundColor: "white",
+            textAlign: "left",
+          }}
+        >
+          {/* <h1>{props.values[props.inputName]}</h1> */}
+        </div>
       </div>
     </div>
   );

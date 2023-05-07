@@ -1,9 +1,9 @@
-import react, { useEffect, useState } from "react";
+import { useState } from "react";
 import LineTo from "react-lineto";
 import "./DefectEntryImage.css";
-import DefectSelect from "./DefectSelect";
-import { Menu, MenuItem } from "@mui/material";
 import NearMeSharpIcon from "@mui/icons-material/NearMeSharp";
+import NearMeTwoToneIcon from "@mui/icons-material/NearMeTwoTone";
+import CustomMenu from "./CustomMenu";
 
 export default function DefectEntryImage(props) {
   const [selectDefect, setSelectDefect] = useState({
@@ -14,7 +14,6 @@ export default function DefectEntryImage(props) {
 
   const [localMousePos, setLocalMousePos] = useState({});
   const [cursorPos, setCursorPos] = useState({ x: 365, y: 300 });
-  // console.log(selectDefect.value);
 
   const [images] = useState([
     { id: 71835, data: "/screen" },
@@ -23,12 +22,10 @@ export default function DefectEntryImage(props) {
 
   const handleMouseMove = (event) => {
     var bounds = event.target.getBoundingClientRect();
-    // console.log(bounds);
     const localX = event.clientX - bounds.left;
     const localY = event.clientY - bounds.top;
 
     setLocalMousePos({ x: localX, y: localY });
-    // console.log(localMousePos);
   };
 
   const clickHandle = (e, data) => {
@@ -60,12 +57,10 @@ export default function DefectEntryImage(props) {
     >
       {!selectDefect.value && (
         <>
-          {props.data[0].defectButtonRecords.map((data) => {
+          {props.data[0].defectButtonRecords.map((data, _index) => {
             let posX, posY;
             if (data.boxX >= 375) posX = data.boxX - 80;
             else posX = data.boxX;
-
-            // if (data.boxY >= 375) posY = data.boxY - 80;
             posY = data.boxY;
 
             return (
@@ -77,6 +72,7 @@ export default function DefectEntryImage(props) {
                     marginTop: posY,
                     position: "absolute",
                     zIndex: 1000,
+                    borderRadius: "7px",
                   }}
                 >
                   <div
@@ -98,36 +94,23 @@ export default function DefectEntryImage(props) {
                       {data.labelText}
                     </h2>
                   </div>
-                  <Menu
-                    id="basic-menu"
+                  <CustomMenu
                     open={selectDefect.enabled}
                     anchorEl={selectDefect.anchorEl}
                     onClose={() => {
                       setSelectDefect({ enabled: false, anchorEl: 0 });
                       props.setSelectedDefect("");
                     }}
-                    MenuListProps={{
-                      "aria-labelledby": "basic-button",
+                    data={props.data[0].arcDefects}
+                    onClick={(id) => {
+                      setSelectDefect({
+                        enabled: false,
+                        anchorEl: 0,
+                        value: id,
+                      });
+                      props.setSelectedDefect(data.labelText);
                     }}
-                  >
-                    {props.data && //TODO: in the first image there are lots of iteration fix it!!
-                      props.data[0].arcDefects.map((defects) => {
-                        return (
-                          <MenuItem
-                            onClick={() => {
-                              setSelectDefect({
-                                enabled: false,
-                                anchorEl: 0,
-                                value: defects.defectId,
-                              });
-                              props.setSelectedDefect(data.labelText);
-                            }}
-                          >
-                            {defects.defectName}
-                          </MenuItem>
-                        );
-                      })}
-                  </Menu>
+                  />
                 </div>
                 {data.lineX != -100 && (
                   <div
@@ -140,7 +123,7 @@ export default function DefectEntryImage(props) {
                   ></div>
                 )}
                 <LineTo
-                  from="A"
+                  from="A" //TODO: if there is more than one div with a line rendere only one line is being rendered
                   to="B"
                   borderColor="red"
                   borderWidth={1}
@@ -162,7 +145,7 @@ export default function DefectEntryImage(props) {
             marginTop: cursorPos.y,
           }}
         >
-          <NearMeSharpIcon
+          <NearMeTwoToneIcon
             sx={{
               "@keyframes fade": {
                 "0%": { color: "white", fontSize: "20px" },

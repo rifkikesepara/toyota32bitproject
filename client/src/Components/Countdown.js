@@ -37,7 +37,7 @@ export default function Countdown(props) {
           (seconds > 9 ? seconds : "0" + seconds)
       );
 
-      props.onTimesUp(total);
+      if (props.onTimesUp) props.onTimesUp(total);
     }
   };
 

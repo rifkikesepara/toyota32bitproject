@@ -1,18 +1,24 @@
-import { Button, Icon, Skeleton, TextField } from "@mui/material";
+import { Button, Skeleton, TextField } from "@mui/material";
 import "../Pages/ErrorEntry.css";
 import useGetData from "../Hooks/GetData";
 import Countdown from "../Components/Countdown";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import API from "../Resources/api.json";
+import ErrorLog from "../Components/ErrorLog";
+import Alarm from "../Resources/alarm.ogg";
+import { useTranslation } from "react-i18next";
 
 export default function BigFont(props) {
+  const { t } = useTranslation();
   const headerData = useGetData(API.link + "/header", 1000);
   const vehicleData = useGetData(API.link + "/vehicle", 1000);
   const unapproved = useGetData(API.link + "/unapproved", 1000);
 
   return (
     <div
-      className="error-container"
+      className={
+        !props.timesUp ? "error-container" : "error-container-animated"
+      }
       style={{
         display: "flex",
         flexDirection: "column",
@@ -23,7 +29,7 @@ export default function BigFont(props) {
       }}
     >
       <h1 style={{ textAlign: "center", padding: "20px" }}>
-        HATA GİRİŞ EKRANI
+        {t("defectEntryHeader").toUpperCase()}
       </h1>
       <div
         style={{
@@ -34,7 +40,7 @@ export default function BigFont(props) {
           top: 0,
           cursor: "pointer",
         }}
-        onClick={() => props.bigFont({ ...props.bigFont, bigFont: false })}
+        onClick={() => props.setBooleans({ ...props.booleans, bigFont: false })}
       >
         <ArrowBackIcon
           style={{
@@ -61,7 +67,7 @@ export default function BigFont(props) {
           }}
         >
           <div className="column">
-            <h1>MONTAJ NO</h1>
+            <h1>{t("assemblyNo").toUpperCase()}</h1>
             <p>
               {headerData.data ? (
                 headerData.data[0].assyNo
@@ -84,7 +90,7 @@ export default function BigFont(props) {
               borderRightStyle: "dashed",
             }}
           >
-            <h1>BODY NO</h1>
+            <h1>{t("bodyNo").toUpperCase()}</h1>
             <p>
               {headerData.data ? (
                 headerData.data[0].bodyNo
@@ -106,12 +112,12 @@ export default function BigFont(props) {
               backgroundColor: headerData.data[0].bgColor,
             }}
           >
-            <h1>RENK</h1>
+            <h1>{t("color").toUpperCase()}</h1>
             <p>{headerData.data[0].extCode}</p>
           </div>
         ) : (
           <div className="column">
-            <h1>RENK</h1>
+            <h1>{t("color").toUpperCase()}</h1>
             <Skeleton
               variant="rectangular"
               width={70}
@@ -130,11 +136,11 @@ export default function BigFont(props) {
             >
               {headerData.data[0].firstname} {headerData.data[0].lastname}
             </h1>
-            <Countdown
-              time={props.time.current}
-              size={30}
-              onTimesUp={() => {}}
-            />
+            <Countdown time={props.time.current} size={30} />
+            {/* audio sound plays if the user does not enter an defect entry*/}
+            <audio ref={props.audioRef} loop>
+              <source src={Alarm}></source>
+            </audio>
           </div>
         ) : (
           <Skeleton variant="rectangular" width={300} height={40} />
@@ -145,11 +151,11 @@ export default function BigFont(props) {
         style={{ width: "100%", justifyContent: "space-around", margin: 0 }}
       >
         {vehicleData.data ? (
-          <div className="column">
-            <h1 style={{ fontSize: "180px" }}>
+          <div className="column" style={{ width: "100%" }}>
+            <h1 style={{ fontSize: "12vw" }}>
               {vehicleData.data[0].modelName} - {headerData.data[0].assyNo}
             </h1>
-            <h1 style={{ fontSize: "180px" }}>{headerData.data[0].bodyNo}</h1>
+            <h1 style={{ fontSize: "12vw" }}>{headerData.data[0].bodyNo}</h1>
           </div>
         ) : (
           <Skeleton
@@ -175,10 +181,26 @@ export default function BigFont(props) {
             color="error"
             variant="contained"
             sx={{ width: 250, height: 65, marginBottom: "50px" }}
+            onClick={() =>
+              props.setBooleans({ ...props.booleans, errorLog: true })
+            }
           >
-            HATA GİRİŞİ
+            {t("defectEntry").toUpperCase()}
           </Button>
-          <h1>MONTAJ NO</h1>
+          <ErrorLog
+            open={props.booleans.errorLog}
+            openFunc={(bool) =>
+              props.setBooleans({ ...props.booleans, errorLog: bool })
+            }
+            isSaved={(bool) =>
+              props.setBooleans({
+                ...props.booleans,
+                defectLogged: bool,
+                errorLog: bool ? false : true,
+              })
+            }
+          />
+          <h1>{t("assemblyNo").toUpperCase()}</h1>
           <TextField
             sx={{
               borderRadius: 2,
@@ -190,48 +212,47 @@ export default function BigFont(props) {
           />
         </div>
       </div>
-      {1 && (
-        <div
-          className="column"
-          style={{
-            justifyContent: "start",
-            alignItems: "flex-start",
-            width: "96%",
-            marginTop: "20px",
-          }}
-        >
-          {unapproved.data ? (
-            unapproved.data.map((dat) => {
-              return (
-                <h2 style={{ fontSize: "45px" }}>
-                  {dat.partName} - {dat.defectName}
-                </h2>
-              );
-            })
-          ) : (
-            <>
-              <Skeleton
-                variant="rectangular"
-                width={800}
-                height={40}
-                sx={{ margin: "5px" }}
-              />
-              <Skeleton
-                variant="rectangular"
-                width={800}
-                height={40}
-                sx={{ margin: "5px" }}
-              />
-              <Skeleton
-                variant="rectangular"
-                width={800}
-                height={40}
-                sx={{ margin: "5px" }}
-              />
-            </>
-          )}
-        </div>
-      )}
+
+      <div
+        className="column"
+        style={{
+          justifyContent: "start",
+          alignItems: "flex-start",
+          width: "96%",
+          marginTop: "20px",
+        }}
+      >
+        {unapproved.data ? (
+          unapproved.data.map((dat) => {
+            return (
+              <h2 style={{ fontSize: "2.5vw" }}>
+                {dat.partName} - {dat.defectName}
+              </h2>
+            );
+          })
+        ) : (
+          <>
+            <Skeleton
+              variant="rectangular"
+              width={800}
+              height={40}
+              sx={{ margin: "5px" }}
+            />
+            <Skeleton
+              variant="rectangular"
+              width={800}
+              height={40}
+              sx={{ margin: "5px" }}
+            />
+            <Skeleton
+              variant="rectangular"
+              width={800}
+              height={40}
+              sx={{ margin: "5px" }}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

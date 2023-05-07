@@ -1,21 +1,23 @@
 import React from "react";
 import "../Pages/Terminal.css";
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
+  const { t } = useTranslation();
   return (
     <nav className="nav">
       <div className="nav-header">
-        <h1>Araç Kalite Kontrol</h1>
+        <h1>{t("header")}</h1>
       </div>
       <div className="menu-nav">
         <a href="/terminals" className="menu">
-          Anasayfa
+          {t("homepage")}
         </a>
         <a href="/terminals" className="menu">
-          Yardım
+          {t("help")}
         </a>
         <a href="/terminals" className="menu">
-          İletişim
+          {t("contact")}
         </a>
       </div>
     </nav>

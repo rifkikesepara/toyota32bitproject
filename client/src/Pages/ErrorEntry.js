@@ -18,18 +18,20 @@ import BigFont from "./BigFont";
 import ErrorLog from "../Components/ErrorLog";
 import { Navigate, useParams } from "react-router-dom";
 import API from "../Resources/api.json";
-import CustomAlert from "../Components/CustomAlert";
+import { useTranslation } from "react-i18next";
 
 export default function ErrorEntry() {
-  let remainingTime = useRef(90000);
+  const { t } = useTranslation();
+  let remainingTime = useRef(100000);
   let params = useParams();
 
+  const [timesUp, setTimesUp] = useState(false);
   const [booleans, setBooleans] = useState({
     errorLog: false,
-    timesUp: false, //boolean to play audio after the time's up
     bigFont: false, //boolean to switch bigfont mode
     showErrorList: false, //boolean to navigate Error List page
     defectLogged: false, //boolean to check whether the defect is logged or not
+    navigate: false, //boolean to navigate the login page if time's up
   });
 
   const [selectedDefect, setSelectedDefect] = useState();
@@ -64,7 +66,6 @@ export default function ErrorEntry() {
       height: height,
       borderColor: "black",
       color: "black",
-      // marginTop: 1,
       "&:hover": {
         borderColor: "black",
         boxShadow: "none",
@@ -72,31 +73,34 @@ export default function ErrorEntry() {
       },
     };
   };
-  // if (audioRef.current != null) console.log(audioRef.current.paused);
-  if (booleans.bigFont)
-    return <BigFont time={remainingTime} bigFont={setBooleans}></BigFont>;
-  else {
-    return (
-      <>
-        {booleans.defectLogged && (
-          <CustomAlert
-            type="success"
-            message="Hata kaydedildi"
-            onFinished={(bool) =>
-              setBooleans({ ...booleans, defectLogged: false })
-            }
-          />
-        )}
+
+  return (
+    <>
+      {booleans.navigate && (
+        <Navigate
+          to={"../terminal/" + params.depCode + "/" + params.filterCode}
+        />
+      )}
+
+      {booleans.bigFont ? (
+        <BigFont
+          time={remainingTime}
+          booleans={booleans}
+          timesUp={timesUp}
+          setBooleans={setBooleans}
+          audioRef={audioRef}
+        />
+      ) : (
         <div
-          className={
-            !booleans.timesUp ? "error-container" : "error-container-animated"
-          }
+          className={!timesUp ? "error-container" : "error-container-animated"}
         >
           <div className="error-box">
             <div className="row" style={{ width: "100%", margin: 0 }}>
               <div className="error-img-container">
                 <header className="error-header">
-                  <h1 style={{ fontSize: "24px" }}>HATA GİRİŞ EKRANI</h1>
+                  <h1 style={{ fontSize: "24px" }}>
+                    {t("defectEntryHeader").toUpperCase()}
+                  </h1>
                   <div
                     className="row"
                     style={{
@@ -116,7 +120,7 @@ export default function ErrorEntry() {
                         borderRightStyle: "dashed",
                       }}
                     >
-                      <h1>MONTAJ NO</h1>
+                      <h1>{t("assemblyNo").toUpperCase()}</h1>
                       <p>
                         {headerData.data ? (
                           headerData.data[0].assyNo
@@ -137,7 +141,7 @@ export default function ErrorEntry() {
                         borderRightStyle: "dashed",
                       }}
                     >
-                      <h1>BODY NO</h1>
+                      <h1>{t("bodyNo").toUpperCase()}</h1>
                       <p>
                         {headerData.data ? (
                           headerData.data[0].bodyNo
@@ -157,11 +161,9 @@ export default function ErrorEntry() {
                         style={{
                           marginLeft: "30px",
                           backgroundColor: headerData.data[0].bgColor,
-                          // borderRight: "1px solid black",
-                          // borderLeft: "1px solid black",
                         }}
                       >
-                        <h1>RENK</h1>
+                        <h1>{t("color").toUpperCase()}</h1>
                         <p>{headerData.data[0].extCode}</p>
                       </div>
                     ) : (
@@ -171,7 +173,7 @@ export default function ErrorEntry() {
                           marginLeft: "30px",
                         }}
                       >
-                        <h1>RENK</h1>
+                        <h1>{t("color").toUpperCase()}</h1>
                         <Skeleton
                           variant="rectangular"
                           width={70}
@@ -219,13 +221,13 @@ export default function ErrorEntry() {
                     variant="outlined"
                     href="/terminals"
                   >
-                    ÇIKIŞ
+                    {t("quit").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
                   >
-                    MODEL İLK RESMİ
+                    {t("modelFirstPic").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
@@ -238,7 +240,7 @@ export default function ErrorEntry() {
                       }
                     }}
                   >
-                    &larr; GERİ
+                    &larr; {t("reverse").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
@@ -248,20 +250,20 @@ export default function ErrorEntry() {
                     }
                     href={`/terminal/defcorrect/${params.depCode}/${params.filterCode}`}
                   >
-                    HATA LİSTESİ
+                    {t("defectList").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
                   >
-                    TEMİZLE
+                    {t("clear").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
                     onClick={() => setBooleans({ ...booleans, bigFont: true })}
                   >
-                    BÜYÜK FONT
+                    {t("bigFont").toUpperCase()}
                   </Button>
                 </div>
               </div>
@@ -307,19 +309,22 @@ export default function ErrorEntry() {
                           <source src={Alarm}></source>
                         </audio>
 
-                        <Countdown
-                          time={remainingTime.current}
-                          size={20}
-                          onTimesUp={(t) => {
-                            // console.log(t / 1000);
-                            remainingTime.current = t / 1000;
-                            if (t == 5000) {
-                              // console.log("bitti");
-                              setBooleans({ ...booleans, timesUp: true });
-                              audioRef.current.play();
-                            }
-                          }}
-                        />
+                        {!booleans.bigFont && (
+                          <Countdown
+                            time={remainingTime.current}
+                            size={20}
+                            onTimesUp={(t) => {
+                              // console.log(t / 1000);
+                              remainingTime.current = t / 1000;
+                              if (t == 5000) {
+                                console.log("bitti");
+                                setTimesUp(true);
+                                audioRef.current.play();
+                              }
+                              if (t == 0) setBooleans({ navigate: true });
+                            }}
+                          />
+                        )}
                       </div>
                     </>
                   ) : (
@@ -352,14 +357,14 @@ export default function ErrorEntry() {
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
-                    HIZLI KAYDET
+                    {t("quickSave").toUpperCase()}
                   </Button>
                   <Button
                     disabled={selectedDefect ? false : true}
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
-                    KAYDET VE GEÇ
+                    {t("saveAndSkip").toUpperCase()}
                   </Button>
                   <Button
                     disabled={selectedDefect ? false : true}
@@ -369,7 +374,7 @@ export default function ErrorEntry() {
                       setBooleans({ ...booleans, errorLog: true });
                     }}
                   >
-                    HATA KAYIT
+                    {t("defectLog").toUpperCase()}
                   </Button>
 
                   <ErrorLog
@@ -383,7 +388,9 @@ export default function ErrorEntry() {
                       })
                     }
                   />
-                  <h1 style={{ marginTop: 4 }}>MONTAJ NO</h1>
+                  <h1 style={{ marginTop: 4 }}>
+                    {t("assemblyNo").toUpperCase()}
+                  </h1>
                   <TextField
                     sx={{
                       borderRadius: 2,
@@ -399,19 +406,19 @@ export default function ErrorEntry() {
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
-                    ARA
+                    {t("search").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
-                    TERMINAL İLK RESMİ
+                    {t("terminalFirstPic").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
-                    SIK GELEN HATA
+                    {t("commonDefect").toUpperCase()}
                   </Button>
                   <Button
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
@@ -425,7 +432,7 @@ export default function ErrorEntry() {
             <h2 style={{ margin: 0 }}>{selectedDefect}</h2>
           </div>
         </div>
-      </>
-    );
-  }
+      )}
+    </>
+  );
 }

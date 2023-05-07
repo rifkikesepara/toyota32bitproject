@@ -41,4 +41,8 @@ app.get("/errReason", (req, res) => {
 app.get("/errList", (req, res) => {
   res.json(JSON.parse(fs.readFileSync("errorList.json")));
 });
+
+app.post("/errList", (req, res) => {
+  console.log(req);
+});
 module.exports = app;

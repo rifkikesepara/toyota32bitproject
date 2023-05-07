@@ -1,338 +1,164 @@
 import * as React from "react";
-import { useState, useRef } from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import { TableVirtuoso } from "react-virtuoso";
+import { useState, useRef, createRef } from "react";
 import useGetDataOnce from "../Hooks/GetDataOnce";
-import { Button, Skeleton, TextField } from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { Button, TextField } from "@mui/material";
 import ArrowIcon from "@mui/icons-material/ArrowForwardIos";
 import { useParams } from "react-router-dom";
 import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
+import VirtualTable from "../Components/VirtualTable";
+import { useTranslation } from "react-i18next";
 
 export default function ErrorList() {
-  const tableRef = useRef(null);
-  const scrollerIndex = useRef(0);
+  const { t } = useTranslation();
+
+  let scrolledTop = useRef(0);
+  let scrollerRef = useRef();
+
+  const scroll = (off) => {
+    let offset = scrollerRef.current.scrollTop;
+    if (off < 0) offset += 500;
+    if (off > 0) offset -= 500;
+    // scrolledTop.current -= 500;
+    scrollerRef.current.scrollTo({
+      top: offset,
+      behavior: "smooth",
+    });
+  };
 
   const columns = [
     {
-      width: 45,
-      label: "Bildiren",
+      width: "3%",
+      label: t("notifier").toUpperCase(),
       dataKey: "depCode",
       numeric: true,
     },
     {
-      width: 45,
+      width: "4.2%",
       label: "Body",
       dataKey: "bodyNo",
       numeric: true,
     },
     {
-      width: 30,
+      width: "2.0%",
       label: "Assy",
       dataKey: "asyNo",
       numeric: true,
     },
     {
-      width: 100,
+      width: "4.7%",
       label: "Vin No",
       dataKey: "vinNo",
       numeric: true,
     },
     {
-      width: 50,
-      label: "Renk",
+      width: "4.2%",
+      label: t("color").toUpperCase(),
       dataKey: "rgbCode",
       numeric: false,
     },
     {
-      width: 30,
+      width: "3.2%",
       label: "Mdl",
       dataKey: "modelCode",
       numeric: true,
     },
     {
-      width: 50,
-      label: "Sicil",
+      width: "4.5%",
+      label: t("regestery").toUpperCase(),
       dataKey: "localId",
       numeric: true,
     },
     {
-      width: 150,
-      label: "Parça",
+      width: "10.4%",
+      label: t("part").toUpperCase(),
       dataKey: "partName",
       numeric: true,
     },
     {
-      width: 30,
+      width: "3.5%",
       label: "Spot",
       dataKey: "spotId",
       numeric: true,
     },
     {
-      width: 30,
+      width: "3.5%",
       label: "Gun",
       dataKey: "spotgunId",
       numeric: true,
     },
     {
-      width: 30,
+      width: "3%",
       label: "Arc",
       dataKey: "arcnutboltCode",
       numeric: true,
     },
     {
-      width: 40,
+      width: "2.7%",
       label: "ArcGun",
       dataKey: "arcnutboltgunName",
       numeric: true,
     },
     {
-      width: 100,
-      label: "Hata",
+      width: "9.1%",
+      label: t("defect").toUpperCase(),
       dataKey: "defectName",
       numeric: true,
     },
     {
-      width: 80,
+      width: "2%",
       label: "Rank",
       dataKey: "defrankCode",
       numeric: true,
     },
     {
-      width: 80,
-      label: "Saat",
+      width: "4.7%",
+      label: t("time").toUpperCase(),
       dataKey: "formattedDefectHour",
       numeric: true,
     },
     {
-      width: 80,
-      label: "Hata Türü",
+      width: "4.7%",
+      label: t("defectType").toUpperCase(),
       dataKey: "defectType",
       numeric: true,
     },
     {
-      width: 80,
-      label: "Hata Sor",
+      width: "4.7%",
+      label: t("defectResponsibleShort").toUpperCase(),
       dataKey: "defrespName",
       numeric: true,
     },
     {
-      width: 80,
-      label: "Alt Sorumlu",
+      width: "4.7%",
+      label: t("otherResponsible").toUpperCase(),
       dataKey: "defrespCode",
       numeric: true,
     },
     {
-      width: 80,
+      width: "4.7%",
       label: "NR REASON",
       dataKey: "nrReasonId",
       numeric: false,
     },
     {
-      width: 80,
-      label: "KAYDET",
+      width: "5.4%",
+      label: t("save").toUpperCase(),
       dataKey: "save",
       numeric: false,
     },
     {
-      width: 120,
-      label: "İŞLEM",
+      width: "8.8%",
+      label: t("operation").toUpperCase(),
       dataKey: "edit",
       numeric: false,
     },
   ];
 
-  const VirtuosoTableComponents = {
-    Scroller: React.forwardRef((props, ref) => (
-      <TableContainer component={Paper} {...props} ref={ref} />
-    )),
-    Table: (props) => (
-      <Table
-        {...props}
-        sx={{ margin: 0, borderCollapse: "collapse", tableLayout: "fixed" }}
-      />
-    ),
-    TableHead,
-    TableRow: ({ item: _item, ...props }) => <TableRow {...props} />,
-    TableBody: React.forwardRef((props, ref) => (
-      <TableBody {...props} ref={ref} />
-    )),
-  };
-
-  function fixedHeaderContent() {
-    return (
-      <TableRow>
-        {columns.map((column) => (
-          <TableCell
-            key={column.dataKey}
-            variant="head"
-            align={"center"}
-            style={{
-              width: column.width,
-              paddingInline: 0,
-              overflow: "hidden",
-            }}
-            sx={{
-              backgroundColor: "#ffb700",
-            }}
-          >
-            {column.label}
-          </TableCell>
-        ))}
-      </TableRow>
-    );
-  }
-
-  function rowContent(_index, row) {
-    return (
-      <React.Fragment>
-        {columns.map((column, i) => {
-          return (
-            <TableCell
-              key={column.dataKey}
-              align={"center"}
-              style={{
-                padding: 0,
-                overflow: "hidden",
-                height: "80px",
-                backgroundColor: _index % 2 == 0 ? "#ffc840" : "#d8aa36",
-              }}
-            >
-              {column.numeric ? (
-                <div
-                  style={
-                    column.dataKey == "rgbCode"
-                      ? {
-                          backgroundColor: row[column.dataKey],
-                          borderRadius: "10px",
-                          color:
-                            row[column.dataKey] == "#000000"
-                              ? "white"
-                              : "black",
-                        }
-                      : {}
-                  }
-                >
-                  {column.dataKey == "rgbCode"
-                    ? row["colorExtCode"]
-                    : row[column.dataKey]}
-                </div>
-              ) : (
-                contentAdjuster(column.dataKey, row)
-              )}
-            </TableCell>
-          );
-        })}
-      </React.Fragment>
-    );
-  }
-  const contentAdjuster = (key, row) => {
-    switch (key.toString()) {
-      case "nrReasonId":
-        return (
-          <div style={{ width: "100%" }}>
-            <select style={{ width: "90%", height: "30px" }} name="example">
-              <option value=""></option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="-">Other</option>
-            </select>
-          </div>
-        );
-      case "rgbCode":
-        return (
-          <div
-            style={{
-              backgroundColor: row["rgbCode"],
-              borderRadius: "5px",
-              color: row["rgbCode"] == "#000000" ? "white" : "black",
-              fontSize: "20px",
-              paddingBlock: "4px",
-              marginInline: "3px",
-            }}
-          >
-            {row["colorExtCode"]}
-          </div>
-        );
-      case "edit":
-        return (
-          <div
-            className="row"
-            style={{
-              margin: 0,
-              padding: 0,
-              height: "100%",
-              width: "100%",
-              justifyContent: "space-around",
-            }}
-          >
-            <Button
-              sx={{
-                ...buttonStyle("red"),
-                minWidth: "50px",
-                height: "90%",
-                marginRight: "2px",
-              }}
-              variant="contained"
-            >
-              <EditIcon />
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("red"),
-                minWidth: "5px",
-                height: "90%",
-                marginLeft: "2px",
-              }}
-              variant="contained"
-            >
-              <DeleteIcon />
-            </Button>
-          </div>
-        );
-      case "save":
-        return (
-          <div style={{ width: "100%", height: "100%" }}>
-            <div
-              className="row"
-              style={{
-                width: "100%",
-                height: "100%",
-                margin: 0,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Button
-                sx={{
-                  ...buttonStyle("black"),
-                  height: "90%",
-                  fontSize: "10px",
-                }}
-                variant="contained"
-              >
-                <SaveIcon />
-              </Button>
-            </div>
-          </div>
-        );
-    }
-  };
-
   const [errorList, setErrorList] = useState([]);
   const [filteredErrorList, setFilteredErrorList] = useState([]);
-  const [filterWord, setFilterWord] = useState({ filter: "" });
-  const [bool, setbool] = useState({ refresh: false, dataFetched: false });
+  const [filterWord, setFilterWord] = useState({ bodyNo: "", assyNo: "" });
+  const [refresh, setRefresh] = useState(false);
 
   const buttonStyle = (color) => {
     return {
@@ -349,7 +175,7 @@ export default function ErrorList() {
   };
 
   const filterData = (filter, key) => {
-    const filteredRows = errorList.filter((data) => {
+    const filteredRows = filteredErrorList.filter((data) => {
       switch (key) {
         case "bodyNo":
           return data.bodyNo == filter;
@@ -363,87 +189,62 @@ export default function ErrorList() {
   };
 
   let params = useParams();
-  useGetDataOnce(API.link + "/errList", bool.refresh, (data) => {
+  useGetDataOnce(API.link + "/errList", refresh, (data) => {
     // const depcodeErrorList = data.data[0].defectList.filter((data) => {
     //   return data.depCode == params.depCode;
     // });
     const depcodeErrorList = data.data[0].defectList;
-    setErrorList(depcodeErrorList);
-    setFilteredErrorList(depcodeErrorList);
-    setbool({ ...bool, dataFetched: true });
+    if (depcodeErrorList != filteredErrorList) {
+      setFilteredErrorList(depcodeErrorList);
+      setErrorList(depcodeErrorList);
+    }
   });
-
   return (
-    <div style={{ height: "100vh" }}>
-      <div style={{ height: "80%" }}>
-        <Paper
-          style={{ height: "100%", width: "100%", backgroundColor: "#ffc840" }}
-        >
-          {filteredErrorList.length ? (
-            <TableVirtuoso
-              style={{ backgroundColor: "#ffc840" }}
-              ref={tableRef}
-              data={errorList && filteredErrorList}
-              components={VirtuosoTableComponents}
-              fixedHeaderContent={fixedHeaderContent}
-              itemContent={rowContent}
-            />
-          ) : !bool.dataFetched ? (
-            <></>
-          ) : (
-            <div className="column" style={{ backgroundColor: "#ffc840" }}>
-              <h1>No data found</h1>
-            </div>
-          )}
-        </Paper>
-        <p
+    <>
+      <div style={{ height: "100vh" }}>
+        <VirtualTable
+          style={{ backgroundColor: "#ffc840" }}
+          setScrollerRef={(ref) => {
+            scrollerRef = ref;
+          }}
+          data={filteredErrorList}
+          columns={columns}
+          height="80%"
+          setFilteredErrorList={setFilteredErrorList}
+          scrolledTop={scrolledTop}
+          isRefreshed={setRefresh}
+        />
+        <div
+          className="row"
           style={{
-            border: "1px solid black",
+            margin: 0,
             width: "100%",
-            textAlign: "right",
-            backgroundColor: "#ffc840",
-            height: "auto",
+            height: "18%",
+            position: "absolute",
+            bottom: 0,
+            justifyContent: "space-around",
           }}
         >
-          Total Rows: {errorList.length}
-        </p>
-      </div>
-
-      <div
-        className="row"
-        style={{
-          margin: 0,
-          width: "100%",
-          height: "18%",
-          position: "absolute",
-          bottom: 0,
-          justifyContent: "space-around",
-        }}
-      >
-        <div
-          className="column"
-          style={{ justifyContent: "space-evenly", width: "auto" }}
-        >
           <div
-            className="row"
-            style={{
-              width: "100%",
-              margin: 0,
-              justifyContent: "space-between",
-            }}
+            className="column"
+            style={{ justifyContent: "space-evenly", width: "auto" }}
           >
-            <h2 style={{ width: "100%" }}>MONTAJ NO</h2>
             <div
               className="row"
-              style={{ margin: 0, width: "75%", justifyContent: "right" }}
+              style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
-              <TextField
+              <CustomTextField
+                placeholder={t("assemblyNo").toUpperCase()}
                 sx={{
-                  minWidth: 200,
                   backgroundColor: "white",
                   borderRadius: "5px",
                   border: "1px solid black",
                 }}
+                width={200}
+                name="filterNo"
+                setValues={setFilterWord}
+                values={filterWord}
+                iconPosition="right"
               />
               <Button
                 variant="contained"
@@ -454,37 +255,26 @@ export default function ErrorList() {
                   marginInline: "5px",
                 }}
               >
-                ARA
+                {t("search").toUpperCase()}
               </Button>
             </div>
-          </div>
-          <div
-            className="row"
-            style={{
-              width: "100%",
-              margin: 0,
-            }}
-          >
-            <h2 style={{ width: "100%" }}>BODY NO</h2>
+
             <div
               className="row"
-              style={{ margin: 0, width: "75%", justifyContent: "right" }}
+              style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                placeholder={t("bodyNo").toUpperCase()}
                 sx={{
-                  width: 200,
                   backgroundColor: "white",
                   borderRadius: "5px",
                   border: "1px solid black",
                 }}
                 width={200}
-                onChange={(event) => {
-                  if (filterWord.filter.length <= 1) filterData("", "bodyNo");
-                }}
-                name="filter"
+                name="bodyNo"
                 setValues={setFilterWord}
                 values={filterWord}
-                iconPosition="rightInner"
+                iconPosition="right"
               />
               <Button
                 variant="contained"
@@ -495,151 +285,120 @@ export default function ErrorList() {
                   marginInline: "5px",
                 }}
                 onClick={() => {
-                  scrollerIndex.current = 0;
-                  filterData(filterWord.filter, "bodyNo");
+                  filterData(filterWord.bodyNo, "bodyNo");
                 }}
               >
-                ARA
+                {t("search").toUpperCase()}
               </Button>
             </div>
           </div>
-        </div>
-        <div
-          className="column"
-          style={{ margin: 0, justifyContent: "center", width: "10%" }}
-        >
-          <Button
-            className="name"
-            variant="contained"
-            onClick={() => {
-              if (scrollerIndex.current - 5 >= 5) scrollerIndex.current -= 5;
-              else scrollerIndex.current = 0;
-              tableRef.current.scrollToIndex({
-                index: scrollerIndex.current,
-                behavior: "smooth",
-              });
-            }}
-            sx={{
-              ...buttonStyle("red"),
-              width: "100%",
-              height: "45%",
-              marginBottom: "1px",
-              border: "none",
-              borderRadius: 0,
-              borderTopRightRadius: 15,
-              borderTopLeftRadius: 15,
+          <div
+            className="column"
+            style={{ margin: 0, justifyContent: "center", width: "10%" }}
+          >
+            <Button
+              variant="contained"
+              onClick={() => {
+                scroll(+5);
+              }}
+              sx={{
+                ...buttonStyle("red"),
+                width: "100%",
+                height: "45%",
+                marginBottom: "1px",
+                border: "none",
+                borderRadius: 0,
+                borderTopRightRadius: 15,
+                borderTopLeftRadius: 15,
+              }}
+            >
+              <ArrowIcon style={{ transform: "rotate(-90deg)" }} />
+            </Button>
+            <Button
+              onClick={() => {
+                scroll(-5);
+              }}
+              sx={{
+                ...buttonStyle("red"),
+                width: "100%",
+                height: "45%",
+                marginBottom: "1px",
+                borderRadius: 0,
+                border: "none",
+                borderBottomRightRadius: 15,
+                borderBottomLeftRadius: 15,
+              }}
+            >
+              <ArrowIcon style={{ transform: "rotate(90deg)" }} />
+            </Button>
+          </div>
+          <div
+            className="row"
+            style={{
+              height: "100%",
+              margin: 0,
+              width: "60%",
+              marginLeft: "5px",
             }}
           >
-            <ArrowIcon style={{ transform: "rotate(-90deg)" }} />
-          </Button>
-          <Button
-            onClick={() => {
-              if (scrollerIndex.current + 5 <= filteredErrorList.length - 5)
-                scrollerIndex.current += 5;
-              else scrollerIndex.current = filteredErrorList.length - 5;
-              tableRef.current.scrollToIndex({
-                index: scrollerIndex.current,
-                behavior: "smooth",
-              });
-            }}
-            sx={{
-              ...buttonStyle("red"),
-              width: "100%",
-              height: "45%",
-              marginBottom: "1px",
-              borderRadius: 0,
-              border: "none",
-              borderBottomRightRadius: 15,
-              borderBottomLeftRadius: 15,
-            }}
-          >
-            <ArrowIcon style={{ transform: "rotate(90deg)" }} />
-          </Button>
-        </div>
-        <div
-          className="row"
-          style={{
-            height: "100%",
-            margin: 0,
-            width: "55%",
-            marginLeft: "5px",
-          }}
-        >
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-          >
-            ARAÇ LİSTESİ
-          </Button>
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-          >
-            MANUEL HATA
-          </Button>
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-          >
-            ÇOKLU HATA
-          </Button>
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-          >
-            HATA LİSTESİ
-          </Button>
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-          >
-            HATA KOPYA
-          </Button>
-          <Button
-            sx={{
-              ...buttonStyle("white"),
-              width: "14.28%",
-              height: "85%",
-            }}
-            href="/terminals"
-          >
-            ÇIKIŞ
-          </Button>
-          <Button
-            sx={{
-              color: "black",
-              borderRadius: "100px",
-            }}
-            onClick={async () => {
-              setbool({ ...bool, refresh: !bool.refresh });
-
-              setTimeout(() => {
-                tableRef.current.scrollToIndex({
-                  index: scrollerIndex.current,
-                  behavior: "smooth",
-                });
-              }, 300);
-            }}
-          >
-            <RefreshIcon sx={{ fontSize: "50px" }} />
-          </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+            >
+              {t("vehicleList").toUpperCase()}
+            </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+            >
+              {t("manuelDefect").toUpperCase()}
+            </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+            >
+              {t("multipleDefect").toUpperCase()}
+            </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+            >
+              {t("defectList").toUpperCase()}
+            </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+            >
+              {t("defectCopy").toUpperCase()}
+            </Button>
+            <Button
+              sx={{
+                ...buttonStyle("white"),
+                width: "16.6%",
+                height: "85%",
+              }}
+              href="/terminals"
+            >
+              {t("quit").toUpperCase()}
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
