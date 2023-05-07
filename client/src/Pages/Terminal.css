@@ -4,6 +4,19 @@
   margin: 0;
 }
 
+body {
+  background-color: #bf9937;
+}
+
+@keyframes Fade {
+  from {
+    background-color: none;
+  }
+  to {
+    background-color: #a38129;
+  }
+}
+
 @media only screen and (min-width: 1366px) {
   nav {
     height: 15vh;
@@ -37,7 +50,7 @@
   }
 
   .menu:hover {
-    background-color: #bf9937;
+    animation: Fade 0.5s ease-in-out forwards;
     cursor: pointer;
   }
 
@@ -102,7 +115,8 @@
 
   .filters a:hover {
     cursor: pointer;
-    background-color: #a38129;
+    animation: Fade 0.5s ease-in-out forwards;
+    /* background-color: #a38129; */
   }
 
   .filters b {

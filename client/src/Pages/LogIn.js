@@ -1,6 +1,4 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
-import axios from "axios";
-import * as yup from "yup";
+import React, { useState } from "react";
 import "./Login.css";
 import {
   Select,
@@ -8,52 +6,57 @@ import {
   FormControl,
   TextField,
   Button,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Alert,
+  Skeleton,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
+import {
+  DatePicker,
+  LocalizationProvider,
+  MobileDatePicker,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
-import VirtualKeyboard from "../Components/VirtualKeyboard";
+import useGetData from "../Hooks/GetData";
+import CustomSelect from "../Components/CustomSelect";
+import useGetDataOnce from "../Hooks/GetDataOnce";
+import API from "../Resources/api.json";
+import CustomTextField from "../Components/CustomTextField";
+import useAlert from "../Hooks/useAlert";
+import { useTranslation } from "react-i18next";
 
 export default function LogIN() {
+  const { t } = useTranslation();
+  const { setAlert } = useAlert();
+
   const [depName, setDepName] = useState("");
-  const [terminalList, setTerminalList] = React.useState([]);
   const [count, setCount] = React.useState(0);
-  const [shifts, setShifts] = React.useState([]);
-  const [date, setDate] = React.useState(new Date());
-  const [refs] = useState([createRef(null)]);
-  const [selectedRefa, setSelectedRef] = useState(1);
+  const [variables, setVariables] = useState({
+    key: 0,
+    loading: false,
+    navigate: false,
+  });
 
-  const [inputName, setInputName] = useState("default");
-  const [inputs, setInputs] = useState({});
-  const [logged, setLogged] = useState(2);
-  const [loading, setLoading] = useState(false);
-  const keyboard = useRef();
+  const terminalList = useGetData(API.link + "/login", 500); //fetching terminals data
+  const shifts = useGetData(API.link + "/shifts", 500); //fetching shift data
 
-  const getInputValue = (inputName) => {
-    return inputs[inputName] || "";
-  };
-
-  const onChangeInput = (event) => {
-    const inputVal = event.target.value;
-
-    setInputs({
-      ...inputs,
-      [inputName]: inputVal,
+  let params = useParams();
+  useGetDataOnce(API.link + "/terminals", true, (response) => {
+    //iterating thorugh data to find the correct department that matches with the parameters that we get from the link
+    response.data.map((prevdata) => {
+      if (prevdata.depCode === params.depCode) {
+        setDepName(prevdata.depName); //setting the department name that matches with the correct terminal
+        prevdata.filterBaseds.map((filter) => {
+          if (filter.filterCode === params.filterCode) {
+            setCount(filter.linkCount);
+          }
+        });
+      }
     });
+  });
 
-    formik.setValues({ ...formik.values, [inputName]: inputVal });
-
-    keyboard.current.setInput(inputVal);
-  };
-
+  //test user informations to log into the system
   const [user] = useState({
     sicilno: 321,
     password: 12345,
@@ -69,15 +72,17 @@ export default function LogIN() {
   // });
 
   function checkUser(values) {
-    if (values.sicilno == user.sicilno) {
-      if (values.password == user.password) {
-        if (values.assembleno == user.assembleno) {
-          return true;
-        }
-      }
+    //the function that checks whether the user entered the right informations or not
+    if (
+      values.sicilno == user.sicilno &&
+      values.password == user.password &&
+      values.assembleno == user.assembleno
+    ) {
+      return true;
     }
     return false;
   }
+
   const formik = useFormik({
     initialValues: {
       terminal: 82842,
@@ -88,84 +93,23 @@ export default function LogIN() {
       date: new Date(),
     },
     onSubmit: (values) => {
-      setLoading(true);
-      let a = checkUser(values);
-      if (a) {
-        // alert("User exitst");
-        setLogged(1);
-        setLoading(true);
+      setVariables({ ...variables, loading: true });
+      if (checkUser(values)) {
+        setAlert(t("loginAlert"), "success", 3000, () => {
+          setVariables({ ...variables, loading: true, navigate: true });
+        });
       } else {
-        setLogged(0);
-        // alert("User does not exist");
+        setAlert(t("invalidUserAlert"), "error", 3000, () => {
+          setVariables({ ...variables, loading: false });
+        });
       }
-      // alert(JSON.stringify(values, null, 6));
     },
   });
-
-  let params = useParams();
-  let i = 0;
-  let selectedRef = 0;
-
-  const scroll = (scrollOffset) => {
-    selectedRef = selectedRefa;
-    if (scrollOffset > 0 && selectedRef > 0) {
-      if (selectedRef >= count - 10) selectedRef -= 20;
-      else selectedRef -= 3;
-      refs[selectedRef].current.scrollIntoView({ behavior: "smooth" });
-    } else if (scrollOffset < 0 && selectedRef <= count) {
-      if (selectedRef >= count - 20) selectedRef = count;
-      else selectedRef += 3;
-      refs[selectedRef].current.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-    if (selectedRef <= 1) {
-      selectedRef = 0;
-      refs[0].current.scrollIntoView({ behavior: "smooth" });
-    }
-    setSelectedRef(selectedRef);
-    // console.log(selectedRef);
-  };
-
-  useEffect(() => {
-    axios
-      .get("http://192.168.1.9:3001/login")
-      .then((response) => {
-        setTerminalList(response);
-      })
-      .catch((req, err) => console.log(err));
-
-    axios
-      .get("http://192.168.1.9:3001/shifts")
-      .then((response) => {
-        setShifts(response);
-      })
-      .catch((req, err) => console.log(err));
-
-    axios
-      .get("http://192.168.1.9:3001/terminals")
-      .then((response) => {
-        // console.log(response.data.data);
-        response.data.data.map((prevdata) => {
-          if (prevdata.depCode === params.depCode) {
-            setDepName(prevdata.depName);
-            prevdata.filterBaseds.map((filter) => {
-              if (filter.filterCode === params.filterCode) {
-                setCount(filter.linkCount);
-              }
-              return 0;
-            });
-            return 0;
-          }
-        });
-      })
-      .catch((req, err) => console.log(err));
-  }, []);
 
   const findAssyNo = () => {
     if (terminalList.data) {
       let assyno;
-      terminalList.data.data.map((data) => {
+      terminalList.data.map((data) => {
         if (data.termId === formik.values.terminal) {
           assyno = data.lastAssyNo;
         }
@@ -174,27 +118,9 @@ export default function LogIN() {
     }
   };
 
-  if (logged === 1 && loading) {
-    setTimeout(() => {
-      setLogged(8);
-    }, 1000);
-    setTimeout(() => {
-      console.log("5 saniye sonra");
-      setLogged(5);
-    }, 4000);
-  }
-
-  if (logged === 0 && loading) {
-    setTimeout(() => {
-      console.log("1 saniye sonra");
-      setLogged(7);
-      setLoading(false);
-    }, 1500);
-  }
-
   return (
     <>
-      {logged == 5 && (
+      {variables.navigate && (
         <Navigate
           to={
             "../terminal/defectentry/" +
@@ -203,132 +129,59 @@ export default function LogIN() {
             params.filterCode +
             "/3070725"
           }
-        ></Navigate>
-      )}
-
-      {logged == 8 && (
-        <div className="alert">
-          <Alert
-            severity="success"
-            sx={{ minWidth: "40%", justifyContent: "center" }}
-          >
-            Logged In
-          </Alert>
-        </div>
-      )}
-      {logged == 7 && (
-        <div className="alert">
-          <Alert
-            severity="error"
-            sx={{ minWidth: "40%", justifyContent: "center" }}
-          >
-            Invalid User
-          </Alert>
-        </div>
+        />
       )}
 
       <div className="login-container">
         <form className="login-box" onSubmit={formik.handleSubmit}>
           <div className="row" style={{ justifyContent: "center" }}>
-            <h1>{depName}</h1>
-          </div>
-          <div className="row">
-            {count === 1 && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  zIndex: "100",
-                  width: "100%",
-                  height: "80px",
-                }}
-              ></div>
+            {depName ? (
+              <h1>{depName}</h1>
+            ) : (
+              <Skeleton variant="rectangular" width={300} height={40} />
             )}
-            <p>Terminal Listesi</p>
-            <Select
-              disabled={loading}
-              name="terminal"
-              id="select"
-              sx={{ m: 1, minWidth: "65%", margin: 0 }}
-              value={formik.values.terminal}
-              inputProps={{ "aria-label": "Without label" }}
-              onChange={formik.handleChange}
-            >
-              <div ref={refs[0]} style={{ margin: "-10px" }}></div>
-              <Button
-                sx={{
-                  position: "sticky",
-                  top: "0px",
-                  zIndex: "100",
-                  minWidth: "100%",
-                  height: "50px",
-                  fontSize: "40px",
-                  textAlign: "center",
-                }}
-                onClick={() => scroll(10)}
-                variant="contained"
-              >
-                ↑
-              </Button>
-              {terminalList.data &&
-                terminalList.data.data.slice(0, count).map((prevdata) => {
-                  refs.push(createRef(null));
-                  i++;
-                  return (
-                    <MenuItem ref={refs[i]} value={prevdata.termId}>
-                      {prevdata.termName}
-                    </MenuItem>
-                  );
-                })}
-
-              <Button
-                sx={{
-                  bottom: "0px",
-                  position: "sticky",
-                  zIndex: "100",
-                  minWidth: "100%",
-                  height: "50px",
-                  fontSize: "40px",
-                  textAlign: "center",
-                }}
-                onClick={() => scroll(-10)}
-                variant="contained"
-              >
-                ↓
-              </Button>
-            </Select>
           </div>
           <div className="row">
-            <p>Sicil No</p>
-            <TextField
-              disabled={loading}
+            <p>{t("terminalList")}</p>
+            <CustomSelect
+              disabled={count == 1 || variables.loading ? true : false}
+              sx={{ width: "65%", color: "black" }}
+              data={terminalList.data}
+              count={count}
+              value={formik.values.terminal}
+              onChange={formik.handleChange}
+              name="terminal"
+              menuItemName="termName"
+            />
+          </div>
+          <div className="row">
+            <p>{t("regNumber")}</p>
+            <CustomTextField
+              disabled={variables.loading}
               autoComplete="off"
-              sx={{ minWidth: "65%" }}
+              width="65%"
               name="sicilno"
               id="outlined-size-normal"
-              value={getInputValue("sicilno")}
-              onChange={onChangeInput}
-              onFocus={() => setInputName("sicilno")}
+              setValues={formik.setValues}
+              values={formik.values}
+              iconPosition="rightInner"
             />
           </div>
           <div className="row">
-            <p>Şifre</p>
-            <TextField
-              disabled={loading}
+            <p>{t("password")}</p>
+            <CustomTextField
+              disabled={variables.loading}
               autoComplete="off"
+              width="65%"
               name="password"
-              sx={{ minWidth: "65%" }}
-              id="filled-basic"
-              placeholder="***********"
-              value={getInputValue("password")}
-              onChange={onChangeInput}
-              onFocus={() => {
-                setInputName("password");
-              }}
+              id="outlined-size-normal"
+              setValues={formik.setValues}
+              values={formik.values}
+              iconPosition="rightInner"
             />
           </div>
           <div className="row">
-            <p>Montaj NO</p>
+            <p>{t("assemblyNo")}</p>
             <TextField
               className="TextField"
               name="assembleno"
@@ -340,9 +193,6 @@ export default function LogIN() {
               inputProps={{
                 maxLength: 3,
               }}
-              onChange={onChangeInput}
-              onFocus={() => setInputName("assembleno")}
-              focused
             />
           </div>
           <div
@@ -357,28 +207,28 @@ export default function LogIN() {
               border: formik.values.shift == "B" && "0.1px solid black",
             }}
           >
-            <p>Tarih</p>
+            <p>{t("date")}</p>
             <LocalizationProvider
               dateAdapter={AdapterDayjs}
               adapterLocale={"tr"}
             >
-              <DatePicker
-                disabled={loading}
+              <MobileDatePicker
+                orientation="landscape"
+                disabled={variables.loading}
                 className="datepicker"
                 name="date"
                 value={formik.values.date}
                 onChange={(newValue) => {
                   formik.values.date = newValue;
-                  setDate(newValue);
                 }}
                 renderInput={(params) => <TextField {...params} />}
               />
             </LocalizationProvider>
 
-            <p>Vardiya</p>
+            <p>{t("shift")}</p>
             <FormControl>
               <Select
-                disabled={loading}
+                disabled={variables.loading}
                 name="shift"
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -387,7 +237,7 @@ export default function LogIN() {
                 onChange={formik.handleChange}
               >
                 {shifts.data &&
-                  shifts.data.data.map((prevdata) => {
+                  shifts.data.map((prevdata) => {
                     return (
                       <MenuItem value={prevdata.shiftCode}>
                         {prevdata.shiftCode}
@@ -399,70 +249,34 @@ export default function LogIN() {
           </div>
           <div id="buttons">
             <LoadingButton
-              loading={loading}
+              loading={variables.loading}
               type="submit"
-              sx={{ width: "100%", height: "70px", margin: "15px" }}
+              sx={{
+                width: "100%",
+                height: "70px",
+                margin: "15px",
+                fontSize: "20px",
+              }}
               variant="contained"
             >
-              Kaydet
+              {t("login")}
             </LoadingButton>
 
             <Button
-              disabled={loading}
+              disabled={variables.loading}
               color="error"
-              sx={{ height: "70px", width: "100%", margin: "15px" }}
+              sx={{
+                height: "70px",
+                width: "100%",
+                margin: "15px",
+                fontSize: "20px",
+              }}
               href="/terminals"
               variant="contained"
             >
-              Kapat
+              {t("close")}
             </Button>
           </div>
-
-          <Accordion
-            disabled={loading}
-            elevation={0}
-            sx={{
-              "&:before": {
-                display: "none",
-              },
-              "& .MuiAccordion-root": {
-                backgroundColor: "black",
-              },
-              width: "100%",
-              border: "0px solid black",
-            }}
-            disableGutters
-          >
-            <AccordionSummary
-              sx={{
-                "& .MuiAccordionSummary-content": {
-                  display: "flex",
-                  justifyContent: "center",
-                },
-              }}
-            >
-              <KeyboardAltTwoToneIcon
-                onClick={() => console.log("tikladi")}
-                sx={{ fontSize: "50px", cursor: "pointer" }}
-              />
-            </AccordionSummary>
-            <VirtualKeyboard
-              keyboard={keyboard}
-              setInputs={setInputs}
-              inputName={inputName}
-              setValues={formik.setValues}
-              values={formik.values}
-            />
-            <AccordionDetails>
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              ></div>
-            </AccordionDetails>
-          </Accordion>
         </form>
       </div>
     </>

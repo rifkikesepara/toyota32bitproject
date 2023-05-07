@@ -23,5 +23,26 @@ app.get("/header", (req, res) => {
 app.get("/screen", (req, res) => {
   res.json(JSON.parse(fs.readFileSync("screen.json")));
 });
+app.get("/defectselect", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("defectSelectData.json")));
+});
+app.get("/unapproved", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("unapproved.json")));
+});
+app.get("/vehicle", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("vehicle.json")));
+});
+app.get("/errDetail", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errDetail.json")));
+});
+app.get("/errReason", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errReason.json")));
+});
+app.get("/errList", (req, res) => {
+  res.json(JSON.parse(fs.readFileSync("errorList.json")));
+});
 
+app.post("/errList", (req, res) => {
+  console.log(req);
+});
 module.exports = app;
