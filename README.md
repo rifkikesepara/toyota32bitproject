@@ -1,24 +1,40 @@
 ﻿# Building the App
 
+### Running the server
+
 To run this app, firstly you should execute the mock server to fetch data to the application.
 
 In order to run the mock server you should be in the right file directory
 
 > cd .../toyota-32bit-project/api
 
-`.../toyota-32bit-project/api>` then you can run the server using this command:
+`.../toyota-32bit-project/api>` then you must install the dependencies with the command down below
+
+> npm install
+
+the you can run the server using this command:
 
 > npm start
+
+### Running the application
 
 After running the mock server you will be able to run your application properly. To run the application you should be in the file directory
 
 > cd .../toyota-32bit-project/client
 
-`.../toyota-32bit-project/client>` then you can run the application using this command:
+`.../toyota-32bit-project/client>` as before you must install the dependencies before launching the application, use this commend:
+
+> npm install
+
+After that you will be able to launch the program:
 
 > npm start
 
 If you do this steps properly you will be okay. You can enjoy the application :)
+
+### Changing the API that app uses
+
+If you want to use your own backend server for this application there is a json file called **api.json** you can change the url value whatever your server uses. After changing the api url app will adapt immediately.
 
 ## Custom Hooks
 
