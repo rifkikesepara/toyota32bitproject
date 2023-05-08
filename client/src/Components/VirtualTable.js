@@ -16,6 +16,8 @@ import useAlert from "../Hooks/useAlert";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton/LoadingButton";
 import { useTranslation } from "react-i18next";
+import SearchIcon from "@mui/icons-material/Search";
+import CustomTextField from "./CustomTextField";
 
 export default function VirtualTable(props) {
   const { t } = useTranslation();
@@ -28,6 +30,33 @@ export default function VirtualTable(props) {
     delete: false,
     save: false,
   });
+  const [openFilterWindow, setOpenFilterWindow] = React.useState({
+    open: false,
+  });
+
+  function sort(column) {
+    let sortingFactor;
+
+    if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
+    else sortingFactor = column.dataKey;
+
+    const data = props.data.sort((a, b) => {
+      return a[sortingFactor]
+        .toString()
+        .localeCompare(b[sortingFactor].toString());
+    });
+    props.setFilteredErrorList(data);
+    setLoading(!loading);
+  }
+
+  function deleteRow(row) {
+    setLoading({ ...loading, delete: false });
+    props.setFilteredErrorList(
+      props.data.filter(({ cdate }) => {
+        return cdate != row["cdate"];
+      })
+    );
+  }
 
   const buttonStyle = (color) => {
     return {
@@ -64,32 +93,60 @@ export default function VirtualTable(props) {
   function fixedHeaderContent() {
     return (
       <TableRow>
-        {props.columns.map((column) => (
-          <TableCell
-            key={column.dataKey}
-            variant="head"
-            align={"center"}
-            style={{
-              width: column.width,
-              padding: 0,
-              overflow: "hidden",
-              cursor: "pointer",
-            }}
-            sx={{
-              backgroundColor: "#ffb700",
-            }}
-          >
-            <Button
-              sx={{
-                height: 80,
-                minWidth: "100%",
+        {props.columns.map((column, _index) => (
+          <>
+            <TableCell
+              key={column.dataKey}
+              variant="head"
+              align={"center"}
+              style={{
+                width: column.width,
                 padding: 0,
-                color: "black",
+                overflowX: "hidden",
+                overflowY: "visible",
+                cursor: "pointer",
+                position: "relative",
+              }}
+              sx={{
+                backgroundColor: "#ffb700",
               }}
             >
-              {column.label}
-            </Button>
-          </TableCell>
+              <Button
+                tabIndex={_index}
+                sx={{
+                  height: 60,
+                  minWidth: "100%",
+                  padding: 0,
+                  color: "black",
+                  fontSize: "0.8vw",
+                  zIndex: "0",
+                }}
+                onClick={(e) => {
+                  sort(column);
+                }}
+              >
+                {column.label}
+              </Button>
+              {column.numeric && (
+                <>
+                  <SearchIcon
+                    sx={{
+                      position: "absolute",
+                      zIndex: "50000",
+                      bottom: 0,
+                      left: 0,
+                    }}
+                    onClick={() =>
+                      setOpenFilterWindow({
+                        name: column.label,
+                        open: !openFilterWindow.open,
+                      })
+                    }
+                  />
+                </>
+              )}
+            </TableCell>
+          </>
         ))}
       </TableRow>
     );
@@ -195,6 +252,7 @@ export default function VirtualTable(props) {
             >
               <EditIcon />
             </Button>
+
             <LoadingButton
               loading={loading.delete && loading.buttonId == row["buttonId"]}
               disabled={loading.delete || loading.save || loading.refresh}
@@ -215,12 +273,7 @@ export default function VirtualTable(props) {
                 });
                 scrollerTopRef.current = sclrf.current.scrollTop;
                 setAlert(t("deleteDefectAlert"), "success", 2000, () => {
-                  setLoading({ ...loading, delete: false });
-                  props.setFilteredErrorList(
-                    props.data.filter(({ cdate }) => {
-                      return cdate != row["cdate"];
-                    })
-                  );
+                  deleteRow(row);
                 });
               }}
             >
@@ -303,6 +356,43 @@ export default function VirtualTable(props) {
           </div>
         )}
       </Paper>
+      {openFilterWindow.open && (
+        <div
+          style={{
+            position: "relative",
+          }}
+        >
+          <CustomTextField
+            placeholder={openFilterWindow.name}
+            kayboardLayout="numeric"
+            keyboardWidth="25%"
+            sx={{
+              position: "absolute",
+              backgroundColor: "white",
+              borderRadius: "5px",
+              border: "1px solid black",
+              bottom: 0,
+              left: 0,
+            }}
+            width={100}
+            name="filterWord"
+            setValues={setLoading}
+            values={loading}
+            iconPosition="leftInner"
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: 200,
+              bottom: 0,
+              height: 58,
+              backgroundColor: "red",
+            }}
+          >
+            close
+          </div>
+        </div>
+      )}
       <p
         style={{
           border: "1px solid black",

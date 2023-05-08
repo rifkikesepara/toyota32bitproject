@@ -21,7 +21,7 @@ export default function CustomTextField(props) {
           placeholder={props.placeholder}
           disabled={props.disabled}
           autoComplete={props.autoComplete}
-          sx={{ ...props.sx, width: "100%" }}
+          sx={{ ...props.sx }}
           name={props.name}
           id={props.id}
           value={props.values[props.name]}
@@ -67,6 +67,7 @@ export default function CustomTextField(props) {
             display: bools.showKeyboard ? "flex" : "none",
             ...props.keyboardSX,
           }}
+          layout={props.kayboardLayout}
           width={props.keyboardWidth}
           keyboard={keyboard}
           inputName={props.name}

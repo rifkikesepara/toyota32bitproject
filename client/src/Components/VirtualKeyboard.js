@@ -2,30 +2,39 @@ import React, { useEffect, useRef, useState } from "react";
 import Keyboard from "react-simple-keyboard";
 import "../Components/Keyboard.css";
 import "react-simple-keyboard/build/css/index.css";
+import turkishLayout from "../KeyboardLayouts/Turkish";
+import englishLayout from "../KeyboardLayouts/English";
+import numericLayout from "../KeyboardLayouts/Numeric";
+import { useTranslation } from "react-i18next";
 
 export default function VirtualKeyboard(props) {
+  const { i18n } = useTranslation();
   const divRef = useRef();
   const textAreaRef = useRef();
   const [layoutName, setLayoutName] = useState("default");
+
+  const adjustLayout = () => {
+    let layout;
+    if (!props.layout) layout = "normal";
+    else layout = props.layout;
+    switch (layout) {
+      case "normal":
+        if (i18n.language == "en") return { ...englishLayout.layout };
+        else return { ...turkishLayout.layout };
+
+      case "numeric":
+        return { ...numericLayout.layout };
+    }
+  };
+
   const onChangeAll = (inputs) => {
     textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
     if (props.onChange) props.onChange(inputs);
-    // props.setValues({
-    //   ...props.values,
-    //   [props.inputName]: props.inputRef.current + inputs[props.inputName],
-    // });
+
     props.setValues({
       ...props.values,
       [props.inputName]: inputs[props.inputName],
     });
-    // props.inputRef.current = inputs[props.inputName];
-    /**
-     * Here we spread the inputs into a new object
-     * If we modify the same object, react will not trigger a re-render
-     */
-    // console.log(inputs[props.inputName]);
-
-    // console.log("Inputs changed", inputs);
   };
 
   const handleShift = () => {
@@ -79,8 +88,18 @@ export default function VirtualKeyboard(props) {
           onInit={() => {
             divRef.current.focus();
           }}
+          layout={adjustLayout()}
           keyboardRef={(r) => (props.keyboard.current = r)}
           inputName={props.inputName}
+          display={{
+            "{enter}": "Enter",
+            "{clear}": "Clear",
+            "{bksp}": "&#8592",
+            "{space}": " ",
+            "{tab}": "Tab",
+            "{lock}": "Capslock",
+            "{shift}": "Shift",
+          }}
           layoutName={layoutName}
           onChangeAll={onChangeAll}
           onKeyPress={onKeyPress}

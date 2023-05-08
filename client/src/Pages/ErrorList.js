@@ -235,6 +235,8 @@ export default function ErrorList() {
             >
               <CustomTextField
                 placeholder={t("assemblyNo").toUpperCase()}
+                kayboardLayout="numeric"
+                keyboardWidth="25%"
                 sx={{
                   backgroundColor: "white",
                   borderRadius: "5px",
@@ -264,6 +266,8 @@ export default function ErrorList() {
               style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                kayboardLayout="numeric"
+                keyboardWidth="25%"
                 placeholder={t("bodyNo").toUpperCase()}
                 sx={{
                   backgroundColor: "white",

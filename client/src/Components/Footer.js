@@ -1,8 +1,8 @@
-import { Button, Menu, MenuItem, Select } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Turkish from "../Resources/turkish.png";
 import English from "../Resources/english.png";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export default function Footer({ children }) {
   const { i18n } = useTranslation();
@@ -10,8 +10,8 @@ export default function Footer({ children }) {
   const open = Boolean(anchorEl);
 
   const changeLanguage = (e) => {
-    i18n.changeLanguage(e.target.value);
-    localStorage.setItem("language", e.target.value);
+    i18n.changeLanguage(e);
+    localStorage.setItem("language", e);
   };
 
   const handleClose = () => {
@@ -41,20 +41,21 @@ export default function Footer({ children }) {
         />
         <Menu onClose={handleClose} anchorEl={anchorEl} open={open}>
           <MenuItem
-            value="en"
             onClick={(e) => {
-              i18n.changeLanguage("en");
-              localStorage.setItem("language", e.target.value);
+              // i18n.changeLanguage("en");
+              // localStorage.setItem("language", e.target.value);
+              changeLanguage("en");
               handleClose();
             }}
           >
             <img height={18} width={30} src={English} />
           </MenuItem>
           <MenuItem
-            value="tr"
             onClick={(e) => {
-              i18n.changeLanguage("tr");
-              localStorage.setItem("language", e.target.value);
+              console.log(e.currentTarget.value);
+              // i18n.changeLanguage("tr");
+              // localStorage.setItem("language", e.target.value);
+              changeLanguage("tr");
               handleClose();
             }}
           >

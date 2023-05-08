@@ -10,11 +10,7 @@ import {
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
-import {
-  DatePicker,
-  LocalizationProvider,
-  MobileDatePicker,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider, MobileDatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
@@ -27,7 +23,7 @@ import useAlert from "../Hooks/useAlert";
 import { useTranslation } from "react-i18next";
 
 export default function LogIN() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { setAlert } = useAlert();
 
   const [depName, setDepName] = useState("");
@@ -158,6 +154,8 @@ export default function LogIN() {
             <p>{t("regNumber")}</p>
             <CustomTextField
               disabled={variables.loading}
+              kayboardLayout="numeric"
+              keyboardWidth="20%"
               autoComplete="off"
               width="65%"
               name="sicilno"
@@ -210,7 +208,7 @@ export default function LogIN() {
             <p>{t("date")}</p>
             <LocalizationProvider
               dateAdapter={AdapterDayjs}
-              adapterLocale={"tr"}
+              adapterLocale={i18n.language}
             >
               <MobileDatePicker
                 orientation="landscape"
