@@ -1,5 +1,5 @@
 import * as React from "react";
-
+import { useState, useEffect } from "react";
 import { TableVirtuoso } from "react-virtuoso";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -11,28 +11,34 @@ import Paper from "@mui/material/Paper";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import useAlert from "../Hooks/useAlert";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton/LoadingButton";
 import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
 import CustomTextField from "./CustomTextField";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function VirtualTable(props) {
   const { t } = useTranslation();
+  const [virtualTableData, setVirtualTableData] = useState();
+  const [virtualTableDataTemp, setVirtualTableDataTemp] = useState();
 
   let scrollerTopRef = React.useRef(0);
   let sclrf = React.useRef(null);
   const { setAlert } = useAlert();
-  const [loading, setLoading] = React.useState({
+  const [loading, setLoading] = useState({
     buttonId: 0,
     delete: false,
     save: false,
   });
-  const [openFilterWindow, setOpenFilterWindow] = React.useState({
+  const [openFilterWindow, setOpenFilterWindow] = useState({
     open: false,
+    filtered: false,
   });
+
+  const [filter, setFilter] = useState("");
 
   function sort(column) {
     let sortingFactor;
@@ -40,23 +46,70 @@ export default function VirtualTable(props) {
     if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
     else sortingFactor = column.dataKey;
 
-    const data = props.data.sort((a, b) => {
+    const data = virtualTableData.sort((a, b) => {
       return a[sortingFactor]
         .toString()
         .localeCompare(b[sortingFactor].toString());
     });
-    props.setFilteredErrorList(data);
+    setVirtualTableData(data);
     setLoading(!loading);
   }
 
   function deleteRow(row) {
     setLoading({ ...loading, delete: false });
-    props.setFilteredErrorList(
-      props.data.filter(({ cdate }) => {
-        return cdate != row["cdate"];
-      })
-    );
+    if (virtualTableDataTemp) {
+      console.log("selam");
+      const temprows = virtualTableDataTemp.filter(({ cdate }) => {
+        return cdate != row.cdate;
+      });
+      setVirtualTableDataTemp(temprows);
+      const rows = virtualTableData.filter(({ cdate }) => {
+        return cdate != row.cdate;
+      });
+      setVirtualTableData(rows);
+    } else {
+      const rows = props.data.filter(({ cdate }) => {
+        return cdate != row.cdate;
+      });
+      setVirtualTableDataTemp(rows);
+      setVirtualTableData(rows);
+    }
   }
+
+  const filterData = (value, filterName) => {
+    // if (props.onFilters) props.onFilters(filter);
+
+    let filterf;
+    if (filterName) {
+      filterf = filterName;
+      setFilter({ ...filter, [filterName]: value[filterName] });
+    } else filterf = openFilterWindow.name;
+
+    setOpenFilterWindow({ ...openFilterWindow, filtered: true });
+    props.isFiltered(true);
+    // console.log(filter);
+    let filteredRows;
+    if (!virtualTableDataTemp) {
+      setVirtualTableDataTemp(props.data);
+      filteredRows = props.data.filter((data) => {
+        return data[filterf]
+          .toString()
+          .toLowerCase()
+          .includes(value[filterf].toLowerCase());
+      });
+    } else {
+      console.log("burda");
+      filteredRows = virtualTableDataTemp.filter((data) => {
+        return data[filterf]
+          .toString()
+          .toLowerCase()
+          .includes(value[filterf].toLowerCase());
+      });
+    }
+    if (value == "") setVirtualTableData(virtualTableDataTemp);
+    else setVirtualTableData(filteredRows);
+    return filteredRows;
+  };
 
   const buttonStyle = (color) => {
     return {
@@ -128,22 +181,25 @@ export default function VirtualTable(props) {
                 {column.label}
               </Button>
               {column.numeric && (
-                <>
-                  <SearchIcon
-                    sx={{
-                      position: "absolute",
-                      zIndex: "50000",
-                      bottom: 0,
-                      left: 0,
-                    }}
-                    onClick={() =>
-                      setOpenFilterWindow({
-                        name: column.label,
-                        open: !openFilterWindow.open,
-                      })
-                    }
-                  />
-                </>
+                <SearchIcon
+                  sx={{
+                    position: "absolute",
+                    zIndex: "50000",
+                    bottom: 0,
+                    left: 0,
+                  }}
+                  onClick={() => {
+                    setOpenFilterWindow({
+                      ...openFilterWindow,
+                      name: column.dataKey,
+                      open: !openFilterWindow.open,
+                    });
+                    if (!filter[column.dataKey])
+                      setFilter({ ...filter, [column.dataKey]: "" });
+                    console.log(filter);
+                    scrollerTopRef.current = sclrf.current.scrollTop;
+                  }}
+                />
               )}
             </TableCell>
           </>
@@ -265,7 +321,6 @@ export default function VirtualTable(props) {
               }}
               variant="contained"
               onClick={() => {
-                console.log(row["buttonId"]);
                 setLoading({
                   ...loading,
                   delete: true,
@@ -326,6 +381,16 @@ export default function VirtualTable(props) {
     }
   };
 
+  useEffect(() => {
+    console.log("selam");
+    if (props.filterWord.bodyNo) {
+      filterData({ bodyNo: props.filterWord.bodyNo }, "bodyNo");
+    }
+    if (props.filterWord.assyNo) {
+      filterData({ bodyNo: props.filterWord.bodyNo }, "assyNo");
+    }
+  }, [props.filterWord]);
+
   return (
     <div style={{ height: props.height }}>
       <Paper
@@ -343,56 +408,62 @@ export default function VirtualTable(props) {
                 sclrf.current.scrollTop = scrollerTopRef.current;
             }}
             style={props.style}
-            data={props.data}
+            data={virtualTableData ? virtualTableData : props.data}
             components={VirtuosoTableComponents}
             fixedHeaderContent={fixedHeaderContent}
             itemContent={rowContent}
           />
-        ) : !props.data ? (
-          <></>
         ) : (
-          <div className="column" style={{ backgroundColor: "#ffc840" }}>
-            <h1>No data found</h1>
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CircularProgress sx={{ color: "black" }} size={"10rem"} />
           </div>
         )}
       </Paper>
-      {openFilterWindow.open && (
-        <div
-          style={{
-            position: "relative",
+
+      <div
+        className="virtualTableTextFieldContainer"
+        style={{
+          marginTop: openFilterWindow.open ? 0 : -150,
+        }}
+      >
+        <CustomTextField
+          className="virtualTableTextField"
+          onClose={() => {
+            setOpenFilterWindow({ ...openFilterWindow, open: false });
           }}
-        >
-          <CustomTextField
-            placeholder={openFilterWindow.name}
-            kayboardLayout="numeric"
-            keyboardWidth="25%"
-            sx={{
-              position: "absolute",
-              backgroundColor: "white",
-              borderRadius: "5px",
-              border: "1px solid black",
-              bottom: 0,
-              left: 0,
-            }}
-            width={100}
-            name="filterWord"
-            setValues={setLoading}
-            values={loading}
-            iconPosition="leftInner"
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 200,
-              bottom: 0,
-              height: 58,
-              backgroundColor: "red",
-            }}
-          >
-            close
-          </div>
-        </div>
-      )}
+          onChange={(value) => {
+            filterData(value);
+          }}
+          onBlur={() =>
+            setOpenFilterWindow({ ...openFilterWindow, open: false })
+          }
+          placeholder={openFilterWindow.name}
+          kayboardLayout="normal"
+          keyboardWidth="100%"
+          keyboardSX={{
+            bottom: "-85vh",
+          }}
+          sx={{
+            backgroundColor: "white",
+            borderRadius: "5px",
+            border: "1px solid black",
+          }}
+          width={100}
+          name={openFilterWindow.name}
+          setValues={setFilter}
+          values={filter}
+          iconPosition="rightInner"
+        />
+      </div>
+
       <p
         style={{
           border: "1px solid black",
@@ -402,6 +473,25 @@ export default function VirtualTable(props) {
           height: "auto",
         }}
       >
+        {openFilterWindow.filtered && (
+          <Button
+            sx={{
+              padding: "1px",
+              color: "black",
+              borderRadius: "100px",
+              height: "20px",
+              minWidth: "10px",
+            }}
+            onClick={() => {
+              setOpenFilterWindow({ ...openFilterWindow, filtered: false });
+              props.isFiltered(false);
+              setVirtualTableData(virtualTableDataTemp);
+              setFilter("");
+            }}
+          >
+            <CloseIcon sx={{ fontSize: "20px" }} />
+          </Button>
+        )}
         <LoadingButton
           loading={loading.refresh}
           sx={{
@@ -411,17 +501,20 @@ export default function VirtualTable(props) {
             minWidth: "20px",
           }}
           onClick={() => {
+            setOpenFilterWindow({ ...openFilterWindow, filtered: false });
             setLoading({ ...loading, refresh: true });
             props.isRefreshed(Math.random());
             setAlert(t("refreshAlert"), "success", 2000, () => {
               setLoading({ ...loading, refresh: false });
+              setVirtualTableData(props.data);
             });
             scrollerTopRef.current = sclrf.current.scrollTop;
           }}
         >
           <RefreshIcon sx={{ fontSize: "20px" }} />
         </LoadingButton>
-        {t("totalRows")}: {props.data.length}
+        {t("totalRows")}:{" "}
+        {virtualTableData ? virtualTableData.length : props.data.length}
       </p>
     </div>
   );

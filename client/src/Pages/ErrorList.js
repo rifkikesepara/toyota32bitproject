@@ -8,12 +8,14 @@ import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
 import VirtualTable from "../Components/VirtualTable";
 import { useTranslation } from "react-i18next";
+import "./ErrorList.css";
 
 export default function ErrorList() {
   const { t } = useTranslation();
 
   let scrolledTop = useRef(0);
   let scrollerRef = useRef();
+  let dataRef = useRef();
 
   const scroll = (off) => {
     let offset = scrollerRef.current.scrollTop;
@@ -159,6 +161,7 @@ export default function ErrorList() {
   const [filteredErrorList, setFilteredErrorList] = useState([]);
   const [filterWord, setFilterWord] = useState({ bodyNo: "", assyNo: "" });
   const [refresh, setRefresh] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const buttonStyle = (color) => {
     return {
@@ -195,10 +198,14 @@ export default function ErrorList() {
     // });
     const depcodeErrorList = data.data[0].defectList;
     if (depcodeErrorList != filteredErrorList) {
-      setFilteredErrorList(depcodeErrorList);
-      setErrorList(depcodeErrorList);
+      setTimeout(() => {
+        setFilteredErrorList(depcodeErrorList);
+        console.log(filteredErrorList.length);
+        setErrorList(depcodeErrorList);
+      }, 1000);
     }
   });
+
   return (
     <>
       <div style={{ height: "100vh" }}>
@@ -208,11 +215,18 @@ export default function ErrorList() {
             scrollerRef = ref;
           }}
           data={filteredErrorList}
+          setData={setFilteredErrorList}
           columns={columns}
           height="80%"
-          setFilteredErrorList={setFilteredErrorList}
           scrolledTop={scrolledTop}
           isRefreshed={setRefresh}
+          dataRef={(ref) => (dataRef = ref)}
+          isFiltered={(bool) => setIsFiltered(bool)}
+          filterWord={filterWord}
+          onFilters={(filters) => {
+            // console.log(filters);
+            setFilterWord({ ...filterWord, bodyNo: filters.bodyNo });
+          }}
         />
         <div
           className="row"

@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material";
 import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VirtualKeyboard from "./VirtualKeyboard";
 export default function CustomTextField(props) {
   const [bools, setBools] = useState({ showIcon: false, showKeyboard: false });
@@ -10,30 +10,35 @@ export default function CustomTextField(props) {
 
   const onChangeInput = (event) => {
     const inputVal = event.target.value;
+    if (props.onChange) props.onChange({ [props.name]: inputVal });
     props.setValues({ ...props.values, [props.name]: inputVal });
     inputRef.current = inputVal;
   };
   //---------------------------------------------------------------------
+
   return (
     <>
-      <div style={{ minWidth: props.width, position: "relative" }}>
+      <div
+        className={props.className}
+        style={{ ...props.style, minWidth: props.width, position: "relative" }}
+      >
         <TextField
           placeholder={props.placeholder}
           disabled={props.disabled}
           autoComplete={props.autoComplete}
-          sx={{ ...props.sx }}
+          sx={{ ...props.sx, width: "100%" }}
           name={props.name}
           id={props.id}
           value={props.values[props.name]}
           onChange={(event) => {
-            if (props.onChange) props.onChange(event.target.value);
             onChangeInput(event);
           }}
-          onFocus={() => {
+          onFocus={(e) => {
             // props.onFocus();
+            console.log(props.values[props.name]);
             setBools({ ...bools, showIcon: true });
+            inputRef.current = e.target.value;
           }}
-          //   onBlur={() => setBools({ ...bools, showIcon: false })}
         />
         {bools.showIcon && (
           <div
@@ -62,10 +67,14 @@ export default function CustomTextField(props) {
 
       {bools.showKeyboard && (
         <VirtualKeyboard
-          onBlur={() => setBools({ ...bools, showKeyboard: false })}
+          onBlur={() => {
+            setBools({ ...bools, showKeyboard: false });
+            if (props.onClose) props.onClose();
+          }}
           style={{
-            display: bools.showKeyboard ? "flex" : "none",
             ...props.keyboardSX,
+            display: bools.showKeyboard ? "flex" : "none",
+            marginTop: bools.showKeyboard ? 700 : 0,
           }}
           layout={props.kayboardLayout}
           width={props.keyboardWidth}

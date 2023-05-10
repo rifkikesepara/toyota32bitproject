@@ -1,0 +1,15 @@
+.virtualTableTextField {
+  position: absolute;
+  width: 18%;
+  display: flex;
+  transition-property: left;
+  transition-duration: 1s;
+}
+
+.virtualTableTextFieldContainer {
+  position: absolute;
+  transition-property: margin-top;
+  transition-duration: 1s;
+  width: 100%;
+  top: 8%;
+}
