@@ -139,6 +139,12 @@ export default function ErrorEntry() {
                       style={{
                         borderRight: "1px solid black",
                         borderRightStyle: "dashed",
+                        backgroundColor:
+                          localStorage.getItem("shift") == "M"
+                            ? "blue"
+                            : localStorage.getItem("shift") == "K"
+                            ? "red"
+                            : "white",
                       }}
                     >
                       <h1>{t("bodyNo").toUpperCase()}</h1>

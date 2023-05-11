@@ -224,8 +224,8 @@ export default function ErrorList() {
           isFiltered={(bool) => setIsFiltered(bool)}
           filterWord={filterWord}
           onFilters={(filters) => {
-            // console.log(filters);
-            setFilterWord({ ...filterWord, bodyNo: filters.bodyNo });
+            console.log(filters);
+            // setFilterWord({ ...filterWord, bodyNo: filters.bodyNo });
           }}
         />
         <div

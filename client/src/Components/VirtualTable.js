@@ -56,21 +56,22 @@ export default function VirtualTable(props) {
   }
 
   function deleteRow(row) {
+    function filterToDelete(data) {
+      return data.filter(({ cdate, formattedDefectHour }) => {
+        return (
+          formattedDefectHour != row.formattedDefectHour && cdate != row.cdate
+        );
+      });
+    }
+
     setLoading({ ...loading, delete: false });
     if (virtualTableDataTemp) {
-      console.log("selam");
-      const temprows = virtualTableDataTemp.filter(({ cdate }) => {
-        return cdate != row.cdate;
-      });
+      const temprows = filterToDelete(virtualTableDataTemp);
       setVirtualTableDataTemp(temprows);
-      const rows = virtualTableData.filter(({ cdate }) => {
-        return cdate != row.cdate;
-      });
+      const rows = filterToDelete(virtualTableData);
       setVirtualTableData(rows);
     } else {
-      const rows = props.data.filter(({ cdate }) => {
-        return cdate != row.cdate;
-      });
+      const rows = filterToDelete(props.data);
       setVirtualTableDataTemp(rows);
       setVirtualTableData(rows);
     }
@@ -310,7 +311,7 @@ export default function VirtualTable(props) {
             </Button>
 
             <LoadingButton
-              loading={loading.delete && loading.buttonId == row["buttonId"]}
+              loading={loading.delete && loading.buttonId == _index}
               disabled={loading.delete || loading.save || loading.refresh}
               sx={{
                 ...buttonStyle("red"),
@@ -324,7 +325,7 @@ export default function VirtualTable(props) {
                 setLoading({
                   ...loading,
                   delete: true,
-                  buttonId: row["buttonId"],
+                  buttonId: _index,
                 });
                 scrollerTopRef.current = sclrf.current.scrollTop;
                 setAlert(t("deleteDefectAlert"), "success", 2000, () => {
@@ -350,7 +351,7 @@ export default function VirtualTable(props) {
               }}
             >
               <LoadingButton
-                loading={loading.save && loading.buttonId == row["buttonId"]}
+                loading={loading.save && loading.buttonId == _index}
                 disabled={loading.save || loading.delete || loading.refresh}
                 sx={{
                   ...buttonStyle("black"),
@@ -364,7 +365,7 @@ export default function VirtualTable(props) {
                   setLoading({
                     ...loading,
                     save: true,
-                    buttonId: row["buttonId"],
+                    buttonId: _index,
                   });
                   scrollerTopRef.current = sclrf.current.scrollTop;
 
@@ -382,7 +383,6 @@ export default function VirtualTable(props) {
   };
 
   useEffect(() => {
-    console.log("selam");
     if (props.filterWord.bodyNo) {
       filterData({ bodyNo: props.filterWord.bodyNo }, "bodyNo");
     }
@@ -441,6 +441,7 @@ export default function VirtualTable(props) {
           }}
           onChange={(value) => {
             filterData(value);
+            props.onFilters(filter);
           }}
           onBlur={() =>
             setOpenFilterWindow({ ...openFilterWindow, open: false })

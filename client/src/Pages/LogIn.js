@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Login.css";
 import {
   Select,
@@ -52,6 +52,8 @@ export default function LogIN() {
     });
   });
 
+  useEffect(() => localStorage.removeItem("shift"), []);
+
   //test user informations to log into the system
   const [user] = useState({
     sicilno: 321,
@@ -93,6 +95,7 @@ export default function LogIN() {
       if (checkUser(values)) {
         setAlert(t("loginAlert"), "success", 3000, () => {
           setVariables({ ...variables, loading: true, navigate: true });
+          localStorage.setItem("shift", formik.values.shift);
         });
       } else {
         setAlert(t("invalidUserAlert"), "error", 3000, () => {
