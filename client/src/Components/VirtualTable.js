@@ -29,7 +29,6 @@ export default function VirtualTable(props) {
   let sclrf = React.useRef(null);
   const { setAlert } = useAlert();
   const [loading, setLoading] = useState({
-    buttonId: 0,
     delete: false,
     save: false,
   });
@@ -41,12 +40,15 @@ export default function VirtualTable(props) {
   const [filter, setFilter] = useState("");
 
   function sort(column) {
-    let sortingFactor;
+    let sortingData;
+    if (virtualTableData) sortingData = virtualTableData;
+    else sortingData = props.data;
 
+    let sortingFactor;
     if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
     else sortingFactor = column.dataKey;
 
-    const data = virtualTableData.sort((a, b) => {
+    const data = sortingData.sort((a, b) => {
       return a[sortingFactor]
         .toString()
         .localeCompare(b[sortingFactor].toString());
@@ -87,8 +89,9 @@ export default function VirtualTable(props) {
     } else filterf = openFilterWindow.name;
 
     setOpenFilterWindow({ ...openFilterWindow, filtered: true });
-    props.isFiltered(true);
-    // console.log(filter);
+    if (props.isFiltered) props.isFiltered(true);
+
+    //------------------Filtering Part----------------------------------
     let filteredRows;
     if (!virtualTableDataTemp) {
       setVirtualTableDataTemp(props.data);
@@ -99,16 +102,70 @@ export default function VirtualTable(props) {
           .includes(value[filterf].toLowerCase());
       });
     } else {
-      console.log("burda");
-      filteredRows = virtualTableDataTemp.filter((data) => {
-        return data[filterf]
-          .toString()
-          .toLowerCase()
-          .includes(value[filterf].toLowerCase());
-      });
+      console.log("asil data kullaniliyor");
+      console.log(filter);
+      if (Object.keys(filter).length > 1) {
+        var exceptFilters = Object.keys(filter).filter(
+          (element) => element != filterf
+        );
+
+        let filteredRows2 = exceptFilters.map((filterKeys) => {
+          console.log(filter[filterKeys]);
+          // console.log(filter);
+          // console.log(value[filterKeys].toString());
+          return virtualTableDataTemp.filter((data) => {
+            return data[filterKeys]
+              .toString()
+              .toLowerCase()
+              .includes(filter[filterKeys].toLowerCase());
+          });
+        });
+
+        filteredRows = virtualTableDataTemp.filter((data) => {
+          return data[filterf]
+            .toString()
+            .toLowerCase()
+            .includes(value[filterf].toLowerCase());
+        });
+
+        // filteredRows = filteredRows[0].filter((element) =>
+        //   filteredRows[1].includes(element)
+        // );
+        // console.log(filteredRows);
+        console.log("------------filteredRows2------------ ");
+        console.log(filteredRows2);
+        console.log("---------------------- ");
+        if (filteredRows2.length > 1)
+          filteredRows2 = filteredRows2.map((filteredArray, _index) => {
+            if (_index != filteredRows2.length - 1)
+              return filteredArray.filter((element) =>
+                filteredRows2[_index + 1].includes(element)
+              );
+          });
+
+        filteredRows = filteredRows.filter((element) =>
+          filteredRows2[0].includes(element)
+        );
+
+        // filteredRows = filteredRows.filter((element) =>
+        //   filteredRows2[0].includes(element)
+        // );
+
+        console.log(filteredRows);
+        setVirtualTableData(filteredRows);
+      } else {
+        filteredRows = virtualTableDataTemp.filter((data) => {
+          return data[filterf]
+            .toString()
+            .toLowerCase()
+            .includes(value[filterf].toLowerCase());
+        });
+        setVirtualTableData(filteredRows);
+      }
     }
+
     if (value == "") setVirtualTableData(virtualTableDataTemp);
-    else setVirtualTableData(filteredRows);
+    //------------------------------------------------------------------
     return filteredRows;
   };
 
@@ -148,62 +205,60 @@ export default function VirtualTable(props) {
     return (
       <TableRow>
         {props.columns.map((column, _index) => (
-          <>
-            <TableCell
-              key={column.dataKey}
-              variant="head"
-              align={"center"}
-              style={{
-                width: column.width,
-                padding: 0,
-                overflowX: "hidden",
-                overflowY: "visible",
-                cursor: "pointer",
-                position: "relative",
-              }}
+          <TableCell
+            key={column.dataKey}
+            variant="head"
+            align={"center"}
+            style={{
+              width: column.width,
+              padding: 0,
+              overflowX: "hidden",
+              overflowY: "visible",
+              cursor: "pointer",
+              position: "relative",
+            }}
+            sx={{
+              backgroundColor: "#ffb700",
+            }}
+          >
+            <Button
+              tabIndex={_index}
               sx={{
-                backgroundColor: "#ffb700",
+                height: 60,
+                minWidth: "100%",
+                padding: 0,
+                color: "black",
+                fontSize: "0.8vw",
+                zIndex: "0",
+              }}
+              onClick={(e) => {
+                sort(column);
+                scrollerTopRef.current = sclrf.current.scrollTop;
               }}
             >
-              <Button
-                tabIndex={_index}
+              {column.label}
+            </Button>
+            {column.numeric && (
+              <SearchIcon
                 sx={{
-                  height: 60,
-                  minWidth: "100%",
-                  padding: 0,
-                  color: "black",
-                  fontSize: "0.8vw",
-                  zIndex: "0",
+                  position: "absolute",
+                  zIndex: "50000",
+                  bottom: 0,
+                  left: 0,
                 }}
-                onClick={(e) => {
-                  sort(column);
+                onClick={() => {
+                  setOpenFilterWindow({
+                    ...openFilterWindow,
+                    name: column.dataKey,
+                    open: !openFilterWindow.open,
+                  });
+                  if (!filter[column.dataKey])
+                    setFilter({ ...filter, [column.dataKey]: "" });
+                  scrollerTopRef.current = sclrf.current.scrollTop;
                 }}
-              >
-                {column.label}
-              </Button>
-              {column.numeric && (
-                <SearchIcon
-                  sx={{
-                    position: "absolute",
-                    zIndex: "50000",
-                    bottom: 0,
-                    left: 0,
-                  }}
-                  onClick={() => {
-                    setOpenFilterWindow({
-                      ...openFilterWindow,
-                      name: column.dataKey,
-                      open: !openFilterWindow.open,
-                    });
-                    if (!filter[column.dataKey])
-                      setFilter({ ...filter, [column.dataKey]: "" });
-                    console.log(filter);
-                    scrollerTopRef.current = sclrf.current.scrollTop;
-                  }}
-                />
-              )}
-            </TableCell>
-          </>
+              />
+            )}
+          </TableCell>
         ))}
       </TableRow>
     );
@@ -383,11 +438,13 @@ export default function VirtualTable(props) {
   };
 
   useEffect(() => {
-    if (props.filterWord.bodyNo) {
-      filterData({ bodyNo: props.filterWord.bodyNo }, "bodyNo");
-    }
-    if (props.filterWord.assyNo) {
-      filterData({ bodyNo: props.filterWord.bodyNo }, "assyNo");
+    if (props.filterWord) {
+      var keys = Object.keys(props.filterWord);
+      keys.map((key) => {
+        console.log(props.filterWord[key]);
+        if (props.filterWord[key] != "")
+          filterData({ [key]: props.filterWord[key] }, key);
+      });
     }
   }, [props.filterWord]);
 
@@ -441,7 +498,7 @@ export default function VirtualTable(props) {
           }}
           onChange={(value) => {
             filterData(value);
-            props.onFilters(filter);
+            if (props.onFilters) props.onFilters(filter);
           }}
           onBlur={() =>
             setOpenFilterWindow({ ...openFilterWindow, open: false })

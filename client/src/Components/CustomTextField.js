@@ -10,8 +10,8 @@ export default function CustomTextField(props) {
 
   const onChangeInput = (event) => {
     const inputVal = event.target.value;
-    if (props.onChange) props.onChange({ [props.name]: inputVal });
     props.setValues({ ...props.values, [props.name]: inputVal });
+    if (props.onChange) props.onChange({ [props.name]: inputVal });
     inputRef.current = inputVal;
   };
   //---------------------------------------------------------------------
@@ -35,7 +35,6 @@ export default function CustomTextField(props) {
           }}
           onFocus={(e) => {
             // props.onFocus();
-            console.log(props.values[props.name]);
             setBools({ ...bools, showIcon: true });
             inputRef.current = e.target.value;
           }}

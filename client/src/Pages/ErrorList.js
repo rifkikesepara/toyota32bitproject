@@ -15,7 +15,6 @@ export default function ErrorList() {
 
   let scrolledTop = useRef(0);
   let scrollerRef = useRef();
-  let dataRef = useRef();
 
   const scroll = (off) => {
     let offset = scrollerRef.current.scrollTop;
@@ -161,7 +160,6 @@ export default function ErrorList() {
   const [filteredErrorList, setFilteredErrorList] = useState([]);
   const [filterWord, setFilterWord] = useState({ bodyNo: "", assyNo: "" });
   const [refresh, setRefresh] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
 
   const buttonStyle = (color) => {
     return {
@@ -200,7 +198,6 @@ export default function ErrorList() {
     if (depcodeErrorList != filteredErrorList) {
       setTimeout(() => {
         setFilteredErrorList(depcodeErrorList);
-        console.log(filteredErrorList.length);
         setErrorList(depcodeErrorList);
       }, 1000);
     }
@@ -215,18 +212,14 @@ export default function ErrorList() {
             scrollerRef = ref;
           }}
           data={filteredErrorList}
-          setData={setFilteredErrorList}
           columns={columns}
           height="80%"
           scrolledTop={scrolledTop}
           isRefreshed={setRefresh}
-          dataRef={(ref) => (dataRef = ref)}
-          isFiltered={(bool) => setIsFiltered(bool)}
-          filterWord={filterWord}
-          onFilters={(filters) => {
-            console.log(filters);
-            // setFilterWord({ ...filterWord, bodyNo: filters.bodyNo });
+          isFiltered={(bool) => {
+            if (!bool) setFilterWord({ bodyNo: "", assyNo: "" });
           }}
+          filterWord={filterWord}
         />
         <div
           className="row"
