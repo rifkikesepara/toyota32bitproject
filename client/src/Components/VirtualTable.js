@@ -21,24 +21,46 @@ import CustomTextField from "./CustomTextField";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function VirtualTable(props) {
-  const { t } = useTranslation();
-  const [virtualTableData, setVirtualTableData] = useState();
-  const [virtualTableDataTemp, setVirtualTableDataTemp] = useState();
+  const { t } = useTranslation(); //getting context for the localization
+  const { setAlert } = useAlert(); //getting context to execute alerts
 
-  let scrollerTopRef = React.useRef(0);
-  let sclrf = React.useRef(null);
-  const { setAlert } = useAlert();
+  const [virtualTableData, setVirtualTableData] = useState(); //the main data that will be shown on the table
+  const [virtualTableDataTemp, setVirtualTableDataTemp] = useState(); //the temp data that will be used when the filtering happens
+
+  let scrollerTopRef = React.useRef(0); //the number ref that stores how far the user scrolled from the top so we can continue wherever we were
+  let sclrf = React.useRef(null); //scroller object ref
+
+  //the state that checks whether the buttons are loading or not
   const [loading, setLoading] = useState({
     delete: false,
     save: false,
   });
-  const [openFilterWindow, setOpenFilterWindow] = useState({
+
+  //the state that stores variables for filtering window
+  const [filterWindow, setFilterWindow] = useState({
     open: false,
     filtered: false,
   });
 
+  //the state that will store filtering words as an object
   const [filter, setFilter] = useState("");
 
+  //the function that is used for styling the button with a different color
+  const buttonStyle = (color) => {
+    return {
+      backgroundColor: color,
+      color: color == "white" ? "black" : "white",
+      boxShadow: "none",
+      border: "1px solid black",
+      "&:hover": {
+        borderColor: "black",
+        boxShadow: "none",
+        backgroundColor: color,
+      },
+    };
+  };
+
+  //SORTING FUNCTION
   function sort(column) {
     let sortingData;
     if (virtualTableData) sortingData = virtualTableData;
@@ -57,6 +79,7 @@ export default function VirtualTable(props) {
     setLoading(!loading);
   }
 
+  //DELETING FUCTION
   function deleteRow(row) {
     function filterToDelete(data) {
       return data.filter(({ cdate, formattedDefectHour }) => {
@@ -79,16 +102,15 @@ export default function VirtualTable(props) {
     }
   }
 
-  const filterData = (value, filterName) => {
-    // if (props.onFilters) props.onFilters(filter);
-
+  //FILTERING FUNCTION
+  function filterData(value, filterName) {
     let filterf;
     if (filterName) {
       filterf = filterName;
       setFilter({ ...filter, [filterName]: value[filterName] });
-    } else filterf = openFilterWindow.name;
+    } else filterf = filterWindow.name;
 
-    setOpenFilterWindow({ ...openFilterWindow, filtered: true });
+    setFilterWindow({ ...filterWindow, filtered: true });
     if (props.isFiltered) props.isFiltered(true);
 
     //------------------Filtering Part----------------------------------
@@ -167,21 +189,7 @@ export default function VirtualTable(props) {
     if (value == "") setVirtualTableData(virtualTableDataTemp);
     //------------------------------------------------------------------
     return filteredRows;
-  };
-
-  const buttonStyle = (color) => {
-    return {
-      backgroundColor: color,
-      color: color == "white" ? "black" : "white",
-      boxShadow: "none",
-      border: "1px solid black",
-      "&:hover": {
-        borderColor: "black",
-        boxShadow: "none",
-        backgroundColor: color,
-      },
-    };
-  };
+  }
 
   const VirtuosoTableComponents = {
     Scroller: React.forwardRef((props, ref) => {
@@ -201,6 +209,7 @@ export default function VirtualTable(props) {
     )),
   };
 
+  //Table's header content
   function fixedHeaderContent() {
     return (
       <TableRow>
@@ -247,10 +256,10 @@ export default function VirtualTable(props) {
                   left: 0,
                 }}
                 onClick={() => {
-                  setOpenFilterWindow({
-                    ...openFilterWindow,
+                  setFilterWindow({
+                    ...filterWindow,
                     name: column.dataKey,
-                    open: !openFilterWindow.open,
+                    open: !filterWindow.open,
                   });
                   if (!filter[column.dataKey])
                     setFilter({ ...filter, [column.dataKey]: "" });
@@ -264,6 +273,7 @@ export default function VirtualTable(props) {
     );
   }
 
+  //Table's row content
   function rowContent(_index, row) {
     return (
       <React.Fragment>
@@ -308,6 +318,7 @@ export default function VirtualTable(props) {
     );
   }
 
+  //the adjuster function that adjusts if the row's value is not just simply a number or string
   const contentAdjuster = (key, row, _index) => {
     switch (key.toString()) {
       case "nrReasonId":
@@ -437,6 +448,7 @@ export default function VirtualTable(props) {
     }
   };
 
+  //effect hook that is used for filtering outside of this component
   useEffect(() => {
     if (props.filterWord) {
       var keys = Object.keys(props.filterWord);
@@ -488,22 +500,20 @@ export default function VirtualTable(props) {
       <div
         className="virtualTableTextFieldContainer"
         style={{
-          marginTop: openFilterWindow.open ? 0 : -150,
+          marginTop: filterWindow.open ? 0 : -150,
         }}
       >
         <CustomTextField
           className="virtualTableTextField"
           onClose={() => {
-            setOpenFilterWindow({ ...openFilterWindow, open: false });
+            setFilterWindow({ ...filterWindow, open: false });
           }}
           onChange={(value) => {
             filterData(value);
             if (props.onFilters) props.onFilters(filter);
           }}
-          onBlur={() =>
-            setOpenFilterWindow({ ...openFilterWindow, open: false })
-          }
-          placeholder={openFilterWindow.name}
+          onBlur={() => setFilterWindow({ ...filterWindow, open: false })}
+          placeholder={filterWindow.name}
           kayboardLayout="normal"
           keyboardWidth="100%"
           keyboardSX={{
@@ -515,7 +525,7 @@ export default function VirtualTable(props) {
             border: "1px solid black",
           }}
           width={100}
-          name={openFilterWindow.name}
+          name={filterWindow.name}
           setValues={setFilter}
           values={filter}
           iconPosition="rightInner"
@@ -531,7 +541,7 @@ export default function VirtualTable(props) {
           height: "auto",
         }}
       >
-        {openFilterWindow.filtered && (
+        {filterWindow.filtered && (
           <Button
             sx={{
               padding: "1px",
@@ -541,7 +551,7 @@ export default function VirtualTable(props) {
               minWidth: "10px",
             }}
             onClick={() => {
-              setOpenFilterWindow({ ...openFilterWindow, filtered: false });
+              setFilterWindow({ ...filterWindow, filtered: false });
               props.isFiltered(false);
               setVirtualTableData(virtualTableDataTemp);
               setFilter("");
@@ -559,7 +569,7 @@ export default function VirtualTable(props) {
             minWidth: "20px",
           }}
           onClick={() => {
-            setOpenFilterWindow({ ...openFilterWindow, filtered: false });
+            setFilterWindow({ ...filterWindow, filtered: false });
             setLoading({ ...loading, refresh: true });
             props.isRefreshed(Math.random());
             setAlert(t("refreshAlert"), "success", 2000, () => {
