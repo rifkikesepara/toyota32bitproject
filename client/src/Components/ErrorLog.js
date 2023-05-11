@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import CustomSelect from "./CustomSelect";
-import useGetData from "../Hooks/GetData";
 import { useFormik } from "formik";
 import API from "../Resources/api.json";
 import CustomTextField from "./CustomTextField";
@@ -38,6 +37,8 @@ export default function ErrorLog(props) {
       subResponsible: 1179,
       explain: "",
       process: "",
+      defectX: 0,
+      defectY: 0,
     },
     onSubmit: (values) => {
       setLoading(true);
@@ -188,8 +189,15 @@ export default function ErrorLog(props) {
                 }}
                 variant="contained"
                 loading={loading}
-                onClick={() => {}}
                 type="submit"
+                onClick={() => {
+                  console.log("selam");
+                  formik.setValues({
+                    ...formik.values,
+                    defectX: localStorage.getItem("defectEntryCursorPosX"),
+                    defectY: localStorage.getItem("defectEntryCursorPosY"),
+                  });
+                }}
               >
                 {t("save")}
               </LoadingButton>

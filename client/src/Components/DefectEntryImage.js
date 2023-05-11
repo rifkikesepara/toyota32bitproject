@@ -26,6 +26,8 @@ export default function DefectEntryImage(props) {
     const localY = event.clientY - bounds.top;
 
     setLocalMousePos({ x: localX, y: localY });
+    localStorage.setItem("defectEntryCursorPosX", cursorPos.x);
+    localStorage.setItem("defectEntryCursorPosY", cursorPos.y);
   };
 
   const clickHandle = (e, data) => {
