@@ -39,7 +39,7 @@ export default function ErrorEntry() {
 
   const [picture, setPicture] = useState(71835);
 
-  //image's sources and ids
+  //image's sources and their ids
   const [images] = useState([
     { id: 71835, img: car1, data: API.link + "/screen" },
     { id: 87897, img: car2, data: API.link + "/defectselect" },
@@ -76,12 +76,14 @@ export default function ErrorEntry() {
 
   return (
     <>
+      {/* navgating back to the login page when the time's up */}
       {booleans.navigate && (
         <Navigate
           to={"../terminal/" + params.depCode + "/" + params.filterCode}
         />
       )}
 
+      {/* switching bigfont mode if user clicks the button */}
       {booleans.bigFont ? (
         <BigFont
           time={remainingTime}
@@ -92,6 +94,7 @@ export default function ErrorEntry() {
         />
       ) : (
         <div
+          //switching className when the time's up to animate the background and alert the user that user is runnning out of time
           className={!timesUp ? "error-container" : "error-container-animated"}
         >
           <div className="error-box">
@@ -382,7 +385,6 @@ export default function ErrorEntry() {
                   >
                     {t("defectLog").toUpperCase()}
                   </Button>
-
                   <ErrorLog
                     open={booleans.errorLog}
                     openFunc={setBooleans}
@@ -435,7 +437,8 @@ export default function ErrorEntry() {
                 </div>
               </div>
             </div>
-            <h2 style={{ margin: 0 }}>{selectedDefect}</h2>
+            {/*shows up whenever user selects a defect*/}
+            <h2 style={{ margin: 0 }}>{selectedDefect}</h2>{" "}
           </div>
         </div>
       )}

@@ -70,6 +70,7 @@ export default function VirtualTable(props) {
     if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
     else sortingFactor = column.dataKey;
 
+    //sorting the data in ascending order
     const data = sortingData.sort((a, b) => {
       return a[sortingFactor]
         .toString()
@@ -81,6 +82,9 @@ export default function VirtualTable(props) {
 
   //DELETING FUCTION
   function deleteRow(row) {
+    setLoading({ ...loading, delete: false });
+
+    //getting the data except the row that the user wanted to delete
     function filterToDelete(data) {
       return data.filter(({ cdate, formattedDefectHour }) => {
         return (
@@ -89,52 +93,53 @@ export default function VirtualTable(props) {
       });
     }
 
-    setLoading({ ...loading, delete: false });
+    //if data is not filtered yet we'll be using raw data to delete otherwise we'll use the data that has been filtered by user
     if (virtualTableDataTemp) {
       const temprows = filterToDelete(virtualTableDataTemp);
-      setVirtualTableDataTemp(temprows);
+      setVirtualTableDataTemp(temprows); //deleting from the data backup stored in virtual table component
       const rows = filterToDelete(virtualTableData);
-      setVirtualTableData(rows);
+      setVirtualTableData(rows); //deleting from the data that has been showing up on the table
     } else {
       const rows = filterToDelete(props.data);
-      setVirtualTableDataTemp(rows);
-      setVirtualTableData(rows);
+      setVirtualTableDataTemp(rows); //deleting and setting data to the virtual table component from the raw data
+      setVirtualTableData(rows); //deleting and setting data to the virtual table component from the raw data
     }
   }
 
   //FILTERING FUNCTION
   function filterData(value, filterName) {
-    let filterf;
-    if (filterName) {
-      filterf = filterName;
-      setFilter({ ...filter, [filterName]: value[filterName] });
-    } else filterf = filterWindow.name;
-
     setFilterWindow({ ...filterWindow, filtered: true });
     if (props.isFiltered) props.isFiltered(true);
 
+    let currentFilterName;
+    //if the filtering outside of the component push the filtering word to the filter words state
+    if (filterName) {
+      currentFilterName = filterName;
+      setFilter({ ...filter, [filterName]: value[filterName] });
+    } else currentFilterName = filterWindow.name;
+
     //------------------Filtering Part----------------------------------
     let filteredRows;
+
+    //if the virtual table data has not been set yet we are gonna use the raw data to filter and set the virtual table data
     if (!virtualTableDataTemp) {
       setVirtualTableDataTemp(props.data);
       filteredRows = props.data.filter((data) => {
-        return data[filterf]
+        return data[currentFilterName]
           .toString()
           .toLowerCase()
-          .includes(value[filterf].toLowerCase());
+          .includes(value[currentFilterName].toLowerCase());
       });
     } else {
-      console.log("asil data kullaniliyor");
-      console.log(filter);
+      //if the filters are just one then we'll filter the data immediately if not we'll filter data according to filters one by one then we'll combine them together
       if (Object.keys(filter).length > 1) {
+        //getting old filters except the filter that user is entering currently
         var exceptFilters = Object.keys(filter).filter(
-          (element) => element != filterf
+          (element) => element != currentFilterName
         );
 
-        let filteredRows2 = exceptFilters.map((filterKeys) => {
-          console.log(filter[filterKeys]);
-          // console.log(filter);
-          // console.log(value[filterKeys].toString());
+        //filtering the data with old filters one by one
+        let exceptFilteredRows = exceptFilters.map((filterKeys) => {
           return virtualTableDataTemp.filter((data) => {
             return data[filterKeys]
               .toString()
@@ -143,50 +148,45 @@ export default function VirtualTable(props) {
           });
         });
 
+        //filtering the data with the filter that user is currently typing
         filteredRows = virtualTableDataTemp.filter((data) => {
-          return data[filterf]
+          return data[currentFilterName]
             .toString()
             .toLowerCase()
-            .includes(value[filterf].toLowerCase());
+            .includes(value[currentFilterName].toLowerCase());
         });
 
-        // filteredRows = filteredRows[0].filter((element) =>
-        //   filteredRows[1].includes(element)
-        // );
-        // console.log(filteredRows);
-        console.log("------------filteredRows2------------ ");
-        console.log(filteredRows2);
-        console.log("---------------------- ");
-        if (filteredRows2.length > 1)
-          filteredRows2 = filteredRows2.map((filteredArray, _index) => {
-            if (_index != filteredRows2.length - 1)
-              return filteredArray.filter((element) =>
-                filteredRows2[_index + 1].includes(element)
-              );
-          });
+        //if the old filters are bigger than one then firstly we'll combine the filtered data arrays with each other
+        if (exceptFilteredRows.length > 1)
+          exceptFilteredRows = exceptFilteredRows.map(
+            (filteredArray, _index) => {
+              if (_index != exceptFilteredRows.length - 1)
+                return filteredArray.filter((element) =>
+                  exceptFilteredRows[_index + 1].includes(element)
+                );
+            }
+          );
 
+        //combining the data array that filtered with old filter word(s) and the data array that filtered with the filter word that the user is currently typing
         filteredRows = filteredRows.filter((element) =>
-          filteredRows2[0].includes(element)
+          exceptFilteredRows[0].includes(element)
         );
 
-        // filteredRows = filteredRows.filter((element) =>
-        //   filteredRows2[0].includes(element)
-        // );
-
-        console.log(filteredRows);
+        //after all the combines we reach the result array that multi-filtered by the filter words and setting the virtual table data to filtered data
         setVirtualTableData(filteredRows);
-      } else {
+      }
+      //if the filter word is just one then we are gonna filter the data immediately because there is not other data array to combine with
+      else {
         filteredRows = virtualTableDataTemp.filter((data) => {
-          return data[filterf]
+          return data[currentFilterName]
             .toString()
             .toLowerCase()
-            .includes(value[filterf].toLowerCase());
+            .includes(value[currentFilterName].toLowerCase());
         });
         setVirtualTableData(filteredRows);
       }
     }
 
-    if (value == "") setVirtualTableData(virtualTableDataTemp);
     //------------------------------------------------------------------
     return filteredRows;
   }
@@ -453,7 +453,6 @@ export default function VirtualTable(props) {
     if (props.filterWord) {
       var keys = Object.keys(props.filterWord);
       keys.map((key) => {
-        console.log(props.filterWord[key]);
         if (props.filterWord[key] != "")
           filterData({ [key]: props.filterWord[key] }, key);
       });
@@ -471,6 +470,7 @@ export default function VirtualTable(props) {
       >
         {props.data.length ? (
           <TableVirtuoso
+            //setting the scroller ref to scroll down where user remain after re-render
             scrollerRef={(ref) => {
               props.setScrollerRef(sclrf);
               if (scrollerTopRef.current)
@@ -551,6 +551,7 @@ export default function VirtualTable(props) {
               minWidth: "10px",
             }}
             onClick={() => {
+              //removing all the filters
               setFilterWindow({ ...filterWindow, filtered: false });
               props.isFiltered(false);
               setVirtualTableData(virtualTableDataTemp);
@@ -569,13 +570,18 @@ export default function VirtualTable(props) {
             minWidth: "20px",
           }}
           onClick={() => {
+            //refreshing to fetch the new data
             setFilterWindow({ ...filterWindow, filtered: false });
             setLoading({ ...loading, refresh: true });
             props.isRefreshed(Math.random());
+
+            //popping an alert to inform the user that the data has been renewed
             setAlert(t("refreshAlert"), "success", 2000, () => {
               setLoading({ ...loading, refresh: false });
               setVirtualTableData(props.data);
             });
+
+            //setting the value of scrollTop to remain the scroller where the user scrolled after refresh the data
             scrollerTopRef.current = sclrf.current.scrollTop;
           }}
         >

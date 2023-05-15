@@ -55,5 +55,6 @@
   "saveDefectAlert": "Hata Kaydedildi",
   "deleteDefectAlert": "Hata Silindi",
   "refreshAlert": "Yenilendi",
-  "saveAlert": "Kaydedildi"
+  "saveAlert": "Kaydedildi",
+  "cantNullError": "Boş olamaz"
 }

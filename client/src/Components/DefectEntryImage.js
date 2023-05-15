@@ -1,25 +1,29 @@
 import { useState } from "react";
 import LineTo from "react-lineto";
 import "./DefectEntryImage.css";
-import NearMeSharpIcon from "@mui/icons-material/NearMeSharp";
 import NearMeTwoToneIcon from "@mui/icons-material/NearMeTwoTone";
 import CustomMenu from "./CustomMenu";
 
 export default function DefectEntryImage(props) {
+  //selected box's variables
   const [selectDefect, setSelectDefect] = useState({
     enabled: false,
     anchorEl: 0,
     value: 0,
   });
 
-  const [localMousePos, setLocalMousePos] = useState({});
+  const [localMousePos, setLocalMousePos] = useState({}); //mouse local positions
+
+  //setting the defect position according to local position of the mouse
   const [cursorPos, setCursorPos] = useState({ x: 365, y: 300 });
 
+  //ids of images and their data's api link
   const [images] = useState([
     { id: 71835, data: "/screen" },
     { id: 87897, data: "/defectselect" },
   ]);
 
+  //the function that gets mouse local position on the div when we move the cursor on the div
   const handleMouseMove = (event) => {
     var bounds = event.target.getBoundingClientRect();
     const localX = event.clientX - bounds.left;
@@ -28,13 +32,17 @@ export default function DefectEntryImage(props) {
     setLocalMousePos({ x: localX, y: localY });
   };
 
+  //the function that handles if the clicked box has child image if not then the defect positioning will be activated
   const clickHandle = (e, data) => {
+    //if picture doesn't have child pic then open the menu to select defect
     if (data.childPicID == 0)
       setSelectDefect({
+        ...selectDefect,
         enabled: true,
         anchorEl: e.currentTarget,
-        value: selectDefect.value,
       });
+
+    //if picture has a child picture set the picture
     images.map((prev) => {
       if (prev.id == data.childPicID) {
         props.setPicture(data.childPicID);
@@ -59,6 +67,8 @@ export default function DefectEntryImage(props) {
         <>
           {props.data[0].defectButtonRecords.map((data, _index) => {
             let posX, posY;
+
+            //positioning the boxes according to the image
             if (data.boxX >= 375) posX = data.boxX - 80;
             else posX = data.boxX;
             posY = data.boxY;
@@ -66,6 +76,7 @@ export default function DefectEntryImage(props) {
             return (
               <>
                 <div
+                  //if the box has a line set the className to A to determine the boxes that will be rendered line
                   className={data.lineX != -100 ? "A" : "C"}
                   style={{
                     marginLeft: posX,
@@ -113,6 +124,7 @@ export default function DefectEntryImage(props) {
                   />
                 </div>
                 {data.lineX != -100 && (
+                  //setting a div to the end of the line to render the line through two points
                   <div
                     className="B"
                     style={{
@@ -136,6 +148,7 @@ export default function DefectEntryImage(props) {
         </>
       )}
       {selectDefect.value ? (
+        //if the defect has been selected then the defect positioning will be activated
         <div
           style={{
             position: "absolute",

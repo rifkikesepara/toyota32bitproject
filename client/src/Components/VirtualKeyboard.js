@@ -8,11 +8,15 @@ import numericLayout from "../KeyboardLayouts/Numeric";
 import { useTranslation } from "react-i18next";
 
 export default function VirtualKeyboard(props) {
-  const { i18n } = useTranslation();
-  const divRef = useRef();
-  const textAreaRef = useRef();
-  const [layoutName, setLayoutName] = useState("default");
+  const { i18n } = useTranslation(); //getting context for the localization on the page
 
+  const divRef = useRef(); //getting virtual keyboard's container div reference to determine whether the user cliked the outside of the div or not
+
+  const textAreaRef = useRef(); //getting the text area refrerence to scroll down if the user's input is not fitting the text area anymore
+
+  const [layoutName, setLayoutName] = useState("default"); //layout name to switch different keyboard layout
+
+  //the function that adjusts the keyboard layout according to layout prop
   const adjustLayout = () => {
     let layout;
     if (!props.layout) layout = "normal";
@@ -27,16 +31,19 @@ export default function VirtualKeyboard(props) {
     }
   };
 
+  //the function that executes whenever user clicks a button on the virtual keyboard
   const onChangeAll = (inputs) => {
     textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
     if (props.onChange) props.onChange(inputs);
 
+    //setting text field value that is outside of the component
     props.setValues({
       ...props.values,
       [props.inputName]: inputs[props.inputName],
     });
   };
 
+  //the function that chages tha layout if the user clicks the shift button on the virtual keyboard
   const handleShift = () => {
     const newLayoutName = layoutName === "default" ? "shift" : "default";
     setLayoutName(newLayoutName);
@@ -50,6 +57,7 @@ export default function VirtualKeyboard(props) {
     if (button === "{shift}" || button === "{lock}") handleShift();
   };
 
+  //whenever virtual keyboard opens it syncronizes with the textfield's value
   useEffect(() => {
     props.keyboard.current.setInput(props.inputRef.current);
   }, []);

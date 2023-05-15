@@ -9,13 +9,15 @@ import Alarm from "../Resources/alarm.ogg";
 import { useTranslation } from "react-i18next";
 
 export default function BigFont(props) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); //getting context for the localization of the page
+
   const headerData = useGetData(API.link + "/header", 1000);
   const vehicleData = useGetData(API.link + "/vehicle", 1000);
   const unapproved = useGetData(API.link + "/unapproved", 1000);
 
   return (
     <div
+      //switching className when the time's up to animate the background and alert the user that user is runnning out of time
       className={
         !props.timesUp ? "error-container" : "error-container-animated"
       }

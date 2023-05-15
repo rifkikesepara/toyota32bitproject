@@ -5,17 +5,15 @@ import English from "../Resources/english.png";
 import { useState } from "react";
 
 export default function Footer({ children }) {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation(); //getting context for the localization on the page
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
+  //the function that change the language according to user's selection of language
   const changeLanguage = (e) => {
     i18n.changeLanguage(e);
     localStorage.setItem("language", e);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -39,24 +37,19 @@ export default function Footer({ children }) {
             setAnchorEl(event.currentTarget);
           }}
         />
-        <Menu onClose={handleClose} anchorEl={anchorEl} open={open}>
+        <Menu onClose={() => setAnchorEl(null)} anchorEl={anchorEl} open={open}>
           <MenuItem
             onClick={(e) => {
-              // i18n.changeLanguage("en");
-              // localStorage.setItem("language", e.target.value);
               changeLanguage("en");
-              handleClose();
+              setAnchorEl(null);
             }}
           >
             <img height={18} width={30} src={English} />
           </MenuItem>
           <MenuItem
             onClick={(e) => {
-              console.log(e.currentTarget.value);
-              // i18n.changeLanguage("tr");
-              // localStorage.setItem("language", e.target.value);
               changeLanguage("tr");
-              handleClose();
+              setAnchorEl(null);
             }}
           >
             <img height={18} width={30} src={Turkish} />
