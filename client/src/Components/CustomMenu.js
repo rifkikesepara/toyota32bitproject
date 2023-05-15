@@ -2,6 +2,7 @@ import { Button, Menu, MenuItem } from "@mui/material";
 import { useRef } from "react";
 
 export default function CustomMenu(props) {
+  //button styling object
   const buttonStyle = {
     color: "black",
     position: "sticky",
@@ -17,7 +18,9 @@ export default function CustomMenu(props) {
     },
   };
 
-  const selectRef = useRef();
+  const selectRef = useRef(); //getting select component reference to adjust the scroller
+
+  //the function to scroll up or down according to offset
   const scroll = (scrollOffset) => {
     let scorlling;
     if (scrollOffset > 0) {

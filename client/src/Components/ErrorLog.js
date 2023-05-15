@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import CustomSelect from "./CustomSelect";
-import useGetData from "../Hooks/GetData";
 import { useFormik } from "formik";
 import API from "../Resources/api.json";
 import CustomTextField from "./CustomTextField";
@@ -18,16 +17,16 @@ import useGetDataOnce from "../Hooks/GetDataOnce";
 import { useTranslation } from "react-i18next";
 
 export default function ErrorLog(props) {
-  const { t } = useTranslation();
-  const { setAlert } = useAlert();
+  const { t } = useTranslation(); //getting context for the localization on the page
+  const { setAlert } = useAlert(); //getting context to pop the alert up whenever we need
 
-  const [dataFetched, setDataFetched] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false); //boolean to detect whether data is fetched or not
+  const [loading, setLoading] = useState(false);
+
   const errDetail = useGetDataOnce(API.link + "/errDetail", true, (data) => {
     setDataFetched(true);
   });
-
   const errReason = useGetDataOnce(API.link + "/errReason", true);
-  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -38,18 +37,21 @@ export default function ErrorLog(props) {
       subResponsible: 1179,
       explain: "",
       process: "",
+      defectX: 0,
+      defectY: 0,
     },
     onSubmit: (values) => {
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
         props.isSaved(true);
+        setAlert(t("saveDefectAlert"), "success", 3000, () => {});
+
         axios
           .post(API.link + "/errList", values)
           .then((res) => console.log(res))
           .catch((err) => console.log(err));
         console.log(values);
-        setAlert(t("saveDefectAlert"), "success", 3000, () => {});
       }, 1000);
     },
   });
@@ -58,6 +60,7 @@ export default function ErrorLog(props) {
     <Dialog
       // sx={{ backdropFilter: "blur(0.2px)" }}
       onClose={() => {
+        //if user clicks outside of the div close the dialog window
         props.openFunc(false);
       }}
       sx={{ overflow: "hidden" }}
@@ -188,8 +191,15 @@ export default function ErrorLog(props) {
                 }}
                 variant="contained"
                 loading={loading}
-                onClick={() => {}}
                 type="submit"
+                onClick={() => {
+                  //getting the defect position from local storage that has been stored before to log
+                  formik.setValues({
+                    ...formik.values,
+                    defectX: localStorage.getItem("defectEntryCursorPosX"),
+                    defectY: localStorage.getItem("defectEntryCursorPosY"),
+                  });
+                }}
               >
                 {t("save")}
               </LoadingButton>

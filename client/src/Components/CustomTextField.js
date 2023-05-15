@@ -3,37 +3,48 @@ import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
 import React, { useRef, useState } from "react";
 import VirtualKeyboard from "./VirtualKeyboard";
 export default function CustomTextField(props) {
+  //booleans to show keyboard
   const [bools, setBools] = useState({ showIcon: false, showKeyboard: false });
-  let inputRef = useRef();
-  //--------------------Virtual Keyboard Stuff----------------------
-  const keyboard = useRef("");
 
+  //getting virtual keyboard input reference to syncronize with the input after closing the virtual keyboard
+  let inputRef = useRef();
+
+  //--------------------Virtual Keyboard Stuff----------------------
+  const keyboard = useRef(""); //getting virtual keyboard reference to syncronize with the physical keyboard
+
+  //the function that sends the input value outside of the component whenever the input changes
   const onChangeInput = (event) => {
     const inputVal = event.target.value;
     props.setValues({ ...props.values, [props.name]: inputVal });
+    if (props.onChange) props.onChange({ [props.name]: inputVal });
     inputRef.current = inputVal;
   };
   //---------------------------------------------------------------------
+
   return (
     <>
-      <div style={{ minWidth: props.width, position: "relative" }}>
+      <div
+        className={props.className}
+        style={{ ...props.style, minWidth: props.width, position: "relative" }}
+      >
         <TextField
+          id={props.id}
           placeholder={props.placeholder}
+          error={props.error && Boolean(props.error)}
+          helperText={props.error && props.helperText}
           disabled={props.disabled}
           autoComplete={props.autoComplete}
           sx={{ ...props.sx, width: "100%" }}
           name={props.name}
-          id={props.id}
           value={props.values[props.name]}
           onChange={(event) => {
-            if (props.onChange) props.onChange(event.target.value);
             onChangeInput(event);
           }}
-          onFocus={() => {
+          onFocus={(e) => {
             // props.onFocus();
-            setBools({ ...bools, showIcon: true });
+            setBools({ ...bools, showIcon: true }); //show the keyboard icon to open the virtual keyboard
+            inputRef.current = e.target.value;
           }}
-          //   onBlur={() => setBools({ ...bools, showIcon: false })}
         />
         {bools.showIcon && (
           <div
@@ -52,7 +63,7 @@ export default function CustomTextField(props) {
               zIndex: "100",
             }}
             onClick={() => {
-              setBools({ ...bools, showKeyboard: true, showIcon: false });
+              setBools({ ...bools, showKeyboard: true, showIcon: false }); //show the virtual keyboard
             }}
           >
             <KeyboardAltTwoToneIcon sx={{ fontSize: "50px" }} />
@@ -62,11 +73,17 @@ export default function CustomTextField(props) {
 
       {bools.showKeyboard && (
         <VirtualKeyboard
-          onBlur={() => setBools({ ...bools, showKeyboard: false })}
-          style={{
-            display: bools.showKeyboard ? "flex" : "none",
-            ...props.keyboardSX,
+          onBlur={() => {
+            //if the user clicks outside of the virtual keyboard close it
+            setBools({ ...bools, showKeyboard: false });
+            if (props.onClose) props.onClose();
           }}
+          style={{
+            ...props.keyboardSX,
+            display: bools.showKeyboard ? "flex" : "none",
+            marginTop: bools.showKeyboard ? 700 : 0,
+          }}
+          layout={props.kayboardLayout}
           width={props.keyboardWidth}
           keyboard={keyboard}
           inputName={props.name}

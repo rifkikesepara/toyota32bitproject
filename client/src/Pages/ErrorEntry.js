@@ -39,7 +39,7 @@ export default function ErrorEntry() {
 
   const [picture, setPicture] = useState(71835);
 
-  //image's sources and ids
+  //image's sources and their ids
   const [images] = useState([
     { id: 71835, img: car1, data: API.link + "/screen" },
     { id: 87897, img: car2, data: API.link + "/defectselect" },
@@ -56,7 +56,7 @@ export default function ErrorEntry() {
 
   const [screenData, setScreenData] = useState([]);
   useGetData(autoArrangewithID(), 1000, setScreenData); //getting image data from the server
-  const headerData = useGetDataOnce(API.link + "/header", 1000); //getting the header data from the server
+  const headerData = useGetDataOnce(API.link + "/header", true); //getting the header data from the server
 
   //button styling function to customize button on the error entry panel
   const buttonStyle = (width, height) => {
@@ -76,12 +76,14 @@ export default function ErrorEntry() {
 
   return (
     <>
+      {/* navgating back to the login page when the time's up */}
       {booleans.navigate && (
         <Navigate
           to={"../terminal/" + params.depCode + "/" + params.filterCode}
         />
       )}
 
+      {/* switching bigfont mode if user clicks the button */}
       {booleans.bigFont ? (
         <BigFont
           time={remainingTime}
@@ -92,6 +94,7 @@ export default function ErrorEntry() {
         />
       ) : (
         <div
+          //switching className when the time's up to animate the background and alert the user that user is runnning out of time
           className={!timesUp ? "error-container" : "error-container-animated"}
         >
           <div className="error-box">
@@ -139,6 +142,12 @@ export default function ErrorEntry() {
                       style={{
                         borderRight: "1px solid black",
                         borderRightStyle: "dashed",
+                        backgroundColor:
+                          localStorage.getItem("shift") == "M"
+                            ? "blue"
+                            : localStorage.getItem("shift") == "K"
+                            ? "red"
+                            : "white",
                       }}
                     >
                       <h1>{t("bodyNo").toUpperCase()}</h1>
@@ -245,9 +254,13 @@ export default function ErrorEntry() {
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
-                    onClick={() =>
-                      setBooleans({ ...booleans, showErrorList: true })
-                    }
+                    onClick={() => {
+                      setBooleans({ ...booleans, showErrorList: true });
+
+                      //removing the defect position due to user has been cancelled the process
+                      localStorage.removeItem("defectEntryCursorPosX");
+                      localStorage.removeItem("defectEntryCursorPosY");
+                    }}
                     href={`/terminal/defcorrect/${params.depCode}/${params.filterCode}`}
                   >
                     {t("defectList").toUpperCase()}
@@ -261,7 +274,12 @@ export default function ErrorEntry() {
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
-                    onClick={() => setBooleans({ ...booleans, bigFont: true })}
+                    onClick={() => {
+                      //removing the defect position due to user has been changing the mode big font
+                      localStorage.removeItem("defectEntryCursorPosX");
+                      localStorage.removeItem("defectEntryCursorPosY");
+                      setBooleans({ ...booleans, bigFont: true });
+                    }}
                   >
                     {t("bigFont").toUpperCase()}
                   </Button>
@@ -376,7 +394,6 @@ export default function ErrorEntry() {
                   >
                     {t("defectLog").toUpperCase()}
                   </Button>
-
                   <ErrorLog
                     open={booleans.errorLog}
                     openFunc={setBooleans}
@@ -429,7 +446,8 @@ export default function ErrorEntry() {
                 </div>
               </div>
             </div>
-            <h2 style={{ margin: 0 }}>{selectedDefect}</h2>
+            {/*shows up whenever user selects a defect*/}
+            <h2 style={{ margin: 0 }}>{selectedDefect}</h2>{" "}
           </div>
         </div>
       )}

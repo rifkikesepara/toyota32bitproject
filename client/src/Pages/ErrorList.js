@@ -1,31 +1,50 @@
 import * as React from "react";
-import { useState, useRef, createRef } from "react";
+import { useState, useRef } from "react";
 import useGetDataOnce from "../Hooks/GetDataOnce";
-import { Button, TextField } from "@mui/material";
+import { Button } from "@mui/material";
 import ArrowIcon from "@mui/icons-material/ArrowForwardIos";
 import { useParams } from "react-router-dom";
 import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
 import VirtualTable from "../Components/VirtualTable";
 import { useTranslation } from "react-i18next";
+import "./ErrorList.css";
 
 export default function ErrorList() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); //getting context for the localization on the page
 
-  let scrolledTop = useRef(0);
-  let scrollerRef = useRef();
+  const [defectList, setDefectList] = useState([]);
+  const [filterWord, setFilterWord] = useState({ bodyNo: "", assyNo: "" }); //filter words to filter table data outside of the component
+  const [refresh, setRefresh] = useState(false); //refresh state to fetch data again when it's changed
 
+  let params = useParams(); //getting params from the link to filter the data according to department
+  useGetDataOnce(API.link + "/errList", refresh, (data) => {
+    // const depcodeErrorList = data.data[0].defectList.filter((data) => {
+    //   return data.depCode == params.depCode;
+    // });
+
+    const depcodeErrorList = data.data[0].defectList;
+    setTimeout(() => {
+      setDefectList(depcodeErrorList);
+    }, 1000); //fetching data after waiting 1 second
+  });
+
+  let scrolledTop = useRef(0); //the reference number to store how much the table's scroll scrolled from the top
+  let scrollerRef = useRef(); //the reference to the table's scroll object
+
+  //the function to scroll up or down according to offset value
   const scroll = (off) => {
     let offset = scrollerRef.current.scrollTop;
     if (off < 0) offset += 500;
     if (off > 0) offset -= 500;
-    // scrolledTop.current -= 500;
+
     scrollerRef.current.scrollTo({
       top: offset,
       behavior: "smooth",
     });
   };
 
+  //table columns to be shown up on the table
   const columns = [
     {
       width: "3%",
@@ -155,11 +174,7 @@ export default function ErrorList() {
     },
   ];
 
-  const [errorList, setErrorList] = useState([]);
-  const [filteredErrorList, setFilteredErrorList] = useState([]);
-  const [filterWord, setFilterWord] = useState({ bodyNo: "", assyNo: "" });
-  const [refresh, setRefresh] = useState(false);
-
+  //the function to style the buttons
   const buttonStyle = (color) => {
     return {
       backgroundColor: color,
@@ -174,31 +189,6 @@ export default function ErrorList() {
     };
   };
 
-  const filterData = (filter, key) => {
-    const filteredRows = filteredErrorList.filter((data) => {
-      switch (key) {
-        case "bodyNo":
-          return data.bodyNo == filter;
-        case "assyNo":
-          return data.assyNo == filter;
-      }
-    });
-    setFilteredErrorList(filteredRows);
-    if (filter == "") setFilteredErrorList(errorList);
-    return filteredRows;
-  };
-
-  let params = useParams();
-  useGetDataOnce(API.link + "/errList", refresh, (data) => {
-    // const depcodeErrorList = data.data[0].defectList.filter((data) => {
-    //   return data.depCode == params.depCode;
-    // });
-    const depcodeErrorList = data.data[0].defectList;
-    if (depcodeErrorList != filteredErrorList) {
-      setFilteredErrorList(depcodeErrorList);
-      setErrorList(depcodeErrorList);
-    }
-  });
   return (
     <>
       <div style={{ height: "100vh" }}>
@@ -207,12 +197,15 @@ export default function ErrorList() {
           setScrollerRef={(ref) => {
             scrollerRef = ref;
           }}
-          data={filteredErrorList}
+          data={defectList}
           columns={columns}
           height="80%"
-          setFilteredErrorList={setFilteredErrorList}
           scrolledTop={scrolledTop}
           isRefreshed={setRefresh}
+          isFiltered={(bool) => {
+            if (!bool) setFilterWord({ bodyNo: "", assyNo: "" });
+          }}
+          filterWord={filterWord}
         />
         <div
           className="row"
@@ -235,6 +228,8 @@ export default function ErrorList() {
             >
               <CustomTextField
                 placeholder={t("assemblyNo").toUpperCase()}
+                kayboardLayout="numeric"
+                keyboardWidth="25%"
                 sx={{
                   backgroundColor: "white",
                   borderRadius: "5px",
@@ -254,6 +249,7 @@ export default function ErrorList() {
                   width: "100px",
                   marginInline: "5px",
                 }}
+                onClick={() => setFilterWord(filterWord)}
               >
                 {t("search").toUpperCase()}
               </Button>
@@ -264,6 +260,8 @@ export default function ErrorList() {
               style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                kayboardLayout="numeric"
+                keyboardWidth="25%"
                 placeholder={t("bodyNo").toUpperCase()}
                 sx={{
                   backgroundColor: "white",
@@ -285,7 +283,7 @@ export default function ErrorList() {
                   marginInline: "5px",
                 }}
                 onClick={() => {
-                  filterData(filterWord.bodyNo, "bodyNo");
+                  setFilterWord(filterWord);
                 }}
               >
                 {t("search").toUpperCase()}

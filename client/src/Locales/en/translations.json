@@ -55,5 +55,6 @@
   "saveDefectAlert": "Defect has been saved",
   "deleteDefectAlert": "Defect has been deleted",
   "refreshAlert": "Refreshed",
-  "saveAlert": "Saved"
+  "saveAlert": "Saved",
+  "cantNullError": "Cannot be empty"
 }

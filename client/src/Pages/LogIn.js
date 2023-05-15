@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Login.css";
 import {
   Select,
@@ -10,11 +10,7 @@ import {
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
-import {
-  DatePicker,
-  LocalizationProvider,
-  MobileDatePicker,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider, MobileDatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
@@ -25,15 +21,15 @@ import API from "../Resources/api.json";
 import CustomTextField from "../Components/CustomTextField";
 import useAlert from "../Hooks/useAlert";
 import { useTranslation } from "react-i18next";
+import * as yup from "yup";
 
 export default function LogIN() {
-  const { t } = useTranslation();
-  const { setAlert } = useAlert();
+  const { t, i18n } = useTranslation(); //getting context for the localization on the page
+  const { setAlert } = useAlert(); //getting context to pop the alert up whenever we need
 
   const [depName, setDepName] = useState("");
   const [count, setCount] = React.useState(0);
-  const [variables, setVariables] = useState({
-    key: 0,
+  const [booleans, setBooleans] = useState({
     loading: false,
     navigate: false,
   });
@@ -56,6 +52,8 @@ export default function LogIN() {
     });
   });
 
+  useEffect(() => localStorage.removeItem("shift"), []); //if shift has been stored in the local storage remove it whenever we come back to this page
+
   //test user informations to log into the system
   const [user] = useState({
     sicilno: 321,
@@ -63,16 +61,14 @@ export default function LogIN() {
     assembleno: 770,
   });
 
-  // const validationSchema = yup.object({
-  //   email: yup.string("Enter your a terminal").required("Terminal is required"),
-  //   password: yup
-  //     .string("Enter your password")
-  //     .min(8, "Password should be of minimum 8 characters length")
-  //     .required("Password is required"),
-  // });
+  //validation for the user information
+  const validationSchema = yup.object({
+    sicilno: yup.string().required(t("cantNullError")),
+    password: yup.string().required(t("cantNullError")),
+  });
 
+  //the function that checks whether the user entered the right informations or not (checks with fake info)
   function checkUser(values) {
-    //the function that checks whether the user entered the right informations or not
     if (
       values.sicilno == user.sicilno &&
       values.password == user.password &&
@@ -84,6 +80,7 @@ export default function LogIN() {
   }
 
   const formik = useFormik({
+    //initializing values
     initialValues: {
       terminal: 82842,
       sicilno: "",
@@ -92,20 +89,27 @@ export default function LogIN() {
       shift: "M",
       date: new Date(),
     },
+    validationSchema: validationSchema,
+
+    //when the user submits the values of the info if they are correct then it will navigate us to the next page if not then we'll be alerted
     onSubmit: (values) => {
-      setVariables({ ...variables, loading: true });
+      console.log(values);
+
+      setBooleans({ ...booleans, loading: true });
       if (checkUser(values)) {
         setAlert(t("loginAlert"), "success", 3000, () => {
-          setVariables({ ...variables, loading: true, navigate: true });
+          setBooleans({ ...booleans, loading: true, navigate: true });
+          localStorage.setItem("shift", formik.values.shift);
         });
       } else {
         setAlert(t("invalidUserAlert"), "error", 3000, () => {
-          setVariables({ ...variables, loading: false });
+          setBooleans({ ...booleans, loading: false });
         });
       }
     },
   });
 
+  //the function that finds assy no according to the terminal that user selects and returns it
   const findAssyNo = () => {
     if (terminalList.data) {
       let assyno;
@@ -120,7 +124,8 @@ export default function LogIN() {
 
   return (
     <>
-      {variables.navigate && (
+      {/* if the user infos are correct we'll be navigated */}
+      {booleans.navigate && (
         <Navigate
           to={
             "../terminal/defectentry/" +
@@ -144,24 +149,26 @@ export default function LogIN() {
           <div className="row">
             <p>{t("terminalList")}</p>
             <CustomSelect
-              disabled={count == 1 || variables.loading ? true : false}
+              disabled={count == 1 || booleans.loading ? true : false}
               sx={{ width: "65%", color: "black" }}
               data={terminalList.data}
-              count={count}
+              count={count} //the terminal count according to the filter that the user has been selected
               value={formik.values.terminal}
               onChange={formik.handleChange}
               name="terminal"
-              menuItemName="termName"
             />
           </div>
           <div className="row">
             <p>{t("regNumber")}</p>
             <CustomTextField
-              disabled={variables.loading}
+              error={formik.touched.sicilno}
+              helperText={formik.errors.sicilno}
+              disabled={booleans.loading}
+              kayboardLayout="numeric"
+              keyboardWidth="20%"
               autoComplete="off"
               width="65%"
               name="sicilno"
-              id="outlined-size-normal"
               setValues={formik.setValues}
               values={formik.values}
               iconPosition="rightInner"
@@ -170,11 +177,12 @@ export default function LogIN() {
           <div className="row">
             <p>{t("password")}</p>
             <CustomTextField
-              disabled={variables.loading}
+              disabled={booleans.loading}
+              error={formik.touched.password}
+              helperText={formik.errors.password}
               autoComplete="off"
               width="65%"
               name="password"
-              id="outlined-size-normal"
               setValues={formik.setValues}
               values={formik.values}
               iconPosition="rightInner"
@@ -198,6 +206,7 @@ export default function LogIN() {
           <div
             id="shift"
             style={{
+              //changing the background color considering the shift that has been selected
               backgroundColor:
                 formik.values.shift == "M"
                   ? "#12a6eb"
@@ -210,12 +219,11 @@ export default function LogIN() {
             <p>{t("date")}</p>
             <LocalizationProvider
               dateAdapter={AdapterDayjs}
-              adapterLocale={"tr"}
+              adapterLocale={i18n.language}
             >
               <MobileDatePicker
                 orientation="landscape"
-                disabled={variables.loading}
-                className="datepicker"
+                disabled={booleans.loading}
                 name="date"
                 value={formik.values.date}
                 onChange={(newValue) => {
@@ -226,30 +234,25 @@ export default function LogIN() {
             </LocalizationProvider>
 
             <p>{t("shift")}</p>
-            <FormControl>
-              <Select
-                disabled={variables.loading}
-                name="shift"
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={formik.values.shift}
-                inputProps={{ "aria-label": "Without label" }}
-                onChange={formik.handleChange}
-              >
-                {shifts.data &&
-                  shifts.data.map((prevdata) => {
-                    return (
-                      <MenuItem value={prevdata.shiftCode}>
-                        {prevdata.shiftCode}
-                      </MenuItem>
-                    );
-                  })}
-              </Select>
-            </FormControl>
+            <Select
+              disabled={booleans.loading}
+              name="shift"
+              value={formik.values.shift}
+              onChange={formik.handleChange}
+            >
+              {shifts.data &&
+                shifts.data.map((shiftData) => {
+                  return (
+                    <MenuItem value={shiftData.shiftCode}>
+                      {shiftData.shiftCode}
+                    </MenuItem>
+                  );
+                })}
+            </Select>
           </div>
           <div id="buttons">
             <LoadingButton
-              loading={variables.loading}
+              loading={booleans.loading}
               type="submit"
               sx={{
                 width: "100%",
@@ -263,7 +266,7 @@ export default function LogIN() {
             </LoadingButton>
 
             <Button
-              disabled={variables.loading}
+              disabled={booleans.loading}
               color="error"
               sx={{
                 height: "70px",

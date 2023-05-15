@@ -137,6 +137,7 @@
   0% {
     top: -10px;
     opacity: 0;
+    z-index: 100;
   }
   25% {
     opacity: 100%;
@@ -144,6 +145,7 @@
   }
   100% {
     opacity: 0;
+    z-index: -1;
   }
 }
 
@@ -153,7 +155,7 @@
   width: 100%;
   top: 30px;
   position: fixed;
-  z-index: 100;
+  z-index: -1;
   animation-name: alert;
   animation-duration: 4s;
   opacity: 0;

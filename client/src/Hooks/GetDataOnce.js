@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+//custom hook that fetches data just once from the api depending on a variable
 export default function useGetDataOnce(url, dependency, setState) {
   const [data, setData] = useState([]);
 

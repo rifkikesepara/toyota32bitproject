@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+//custom hook that fetches data constantly from the api in a certain time period
 export default function useGetData(url, ts, stateSet) {
   const [data, setData] = useState([]);
 

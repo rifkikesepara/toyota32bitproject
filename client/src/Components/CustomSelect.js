@@ -3,6 +3,7 @@ import { useRef } from "react";
 import React from "react";
 
 export default function CustomSelect(props) {
+  //button styling object
   const buttonStyle = {
     color: "black",
     position: "sticky",
@@ -18,9 +19,10 @@ export default function CustomSelect(props) {
     },
   };
 
-  const count = props.count;
-  const selectRef = useRef();
+  const count = props.count; //count to reduce the menu item count
+  const selectRef = useRef(); //getting select component's reference to adjust the scroller
 
+  //the function to scroll up or down according to offset
   const scroll = (scrollOffset) => {
     let scorlling;
     if (scrollOffset > 0) {
@@ -33,6 +35,7 @@ export default function CustomSelect(props) {
       behavior: "smooth",
     });
   };
+
   return (
     <Select
       open={props.open}

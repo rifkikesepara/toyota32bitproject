@@ -3,7 +3,8 @@ import "../Pages/Terminal.css";
 import { useTranslation } from "react-i18next";
 
 export default function Header() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); //getting context for the localization on the page
+
   return (
     <nav className="nav">
       <div className="nav-header">

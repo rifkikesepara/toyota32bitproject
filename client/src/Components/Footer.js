@@ -1,21 +1,19 @@
-import { Button, Menu, MenuItem, Select } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Turkish from "../Resources/turkish.png";
 import English from "../Resources/english.png";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export default function Footer({ children }) {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation(); //getting context for the localization on the page
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
+  //the function that change the language according to user's selection of language
   const changeLanguage = (e) => {
-    i18n.changeLanguage(e.target.value);
-    localStorage.setItem("language", e.target.value);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+    i18n.changeLanguage(e);
+    localStorage.setItem("language", e);
   };
 
   return (
@@ -39,23 +37,19 @@ export default function Footer({ children }) {
             setAnchorEl(event.currentTarget);
           }}
         />
-        <Menu onClose={handleClose} anchorEl={anchorEl} open={open}>
+        <Menu onClose={() => setAnchorEl(null)} anchorEl={anchorEl} open={open}>
           <MenuItem
-            value="en"
             onClick={(e) => {
-              i18n.changeLanguage("en");
-              localStorage.setItem("language", e.target.value);
-              handleClose();
+              changeLanguage("en");
+              setAnchorEl(null);
             }}
           >
             <img height={18} width={30} src={English} />
           </MenuItem>
           <MenuItem
-            value="tr"
             onClick={(e) => {
-              i18n.changeLanguage("tr");
-              localStorage.setItem("language", e.target.value);
-              handleClose();
+              changeLanguage("tr");
+              setAnchorEl(null);
             }}
           >
             <img height={18} width={30} src={Turkish} />

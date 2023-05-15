@@ -2,32 +2,48 @@ import React, { useEffect, useRef, useState } from "react";
 import Keyboard from "react-simple-keyboard";
 import "../Components/Keyboard.css";
 import "react-simple-keyboard/build/css/index.css";
+import turkishLayout from "../KeyboardLayouts/Turkish";
+import englishLayout from "../KeyboardLayouts/English";
+import numericLayout from "../KeyboardLayouts/Numeric";
+import { useTranslation } from "react-i18next";
 
 export default function VirtualKeyboard(props) {
-  const divRef = useRef();
-  const textAreaRef = useRef();
-  const [layoutName, setLayoutName] = useState("default");
+  const { i18n } = useTranslation(); //getting context for the localization on the page
+
+  const divRef = useRef(); //getting virtual keyboard's container div reference to determine whether the user cliked the outside of the div or not
+
+  const textAreaRef = useRef(); //getting the text area refrerence to scroll down if the user's input is not fitting the text area anymore
+
+  const [layoutName, setLayoutName] = useState("default"); //layout name to switch different keyboard layout
+
+  //the function that adjusts the keyboard layout according to layout prop
+  const adjustLayout = () => {
+    let layout;
+    if (!props.layout) layout = "normal";
+    else layout = props.layout;
+    switch (layout) {
+      case "normal":
+        if (i18n.language == "en") return { ...englishLayout.layout };
+        else return { ...turkishLayout.layout };
+
+      case "numeric":
+        return { ...numericLayout.layout };
+    }
+  };
+
+  //the function that executes whenever user clicks a button on the virtual keyboard
   const onChangeAll = (inputs) => {
     textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
     if (props.onChange) props.onChange(inputs);
-    // props.setValues({
-    //   ...props.values,
-    //   [props.inputName]: props.inputRef.current + inputs[props.inputName],
-    // });
+
+    //setting text field value that is outside of the component
     props.setValues({
       ...props.values,
       [props.inputName]: inputs[props.inputName],
     });
-    // props.inputRef.current = inputs[props.inputName];
-    /**
-     * Here we spread the inputs into a new object
-     * If we modify the same object, react will not trigger a re-render
-     */
-    // console.log(inputs[props.inputName]);
-
-    // console.log("Inputs changed", inputs);
   };
 
+  //the function that chages tha layout if the user clicks the shift button on the virtual keyboard
   const handleShift = () => {
     const newLayoutName = layoutName === "default" ? "shift" : "default";
     setLayoutName(newLayoutName);
@@ -41,6 +57,7 @@ export default function VirtualKeyboard(props) {
     if (button === "{shift}" || button === "{lock}") handleShift();
   };
 
+  //whenever virtual keyboard opens it syncronizes with the textfield's value
   useEffect(() => {
     props.keyboard.current.setInput(props.inputRef.current);
   }, []);
@@ -79,8 +96,18 @@ export default function VirtualKeyboard(props) {
           onInit={() => {
             divRef.current.focus();
           }}
+          layout={adjustLayout()}
           keyboardRef={(r) => (props.keyboard.current = r)}
           inputName={props.inputName}
+          display={{
+            "{enter}": "Enter",
+            "{clear}": "Clear",
+            "{bksp}": "&#8592",
+            "{space}": " ",
+            "{tab}": "Tab",
+            "{lock}": "Capslock",
+            "{shift}": "Shift",
+          }}
           layoutName={layoutName}
           onChangeAll={onChangeAll}
           onKeyPress={onKeyPress}
