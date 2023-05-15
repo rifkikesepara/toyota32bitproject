@@ -256,6 +256,8 @@ export default function ErrorEntry() {
                     variant="outlined"
                     onClick={() => {
                       setBooleans({ ...booleans, showErrorList: true });
+
+                      //removing the defect position due to user has been cancelled the process
                       localStorage.removeItem("defectEntryCursorPosX");
                       localStorage.removeItem("defectEntryCursorPosY");
                     }}
@@ -273,6 +275,7 @@ export default function ErrorEntry() {
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
                     onClick={() => {
+                      //removing the defect position due to user has been changing the mode big font
                       localStorage.removeItem("defectEntryCursorPosX");
                       localStorage.removeItem("defectEntryCursorPosY");
                       setBooleans({ ...booleans, bigFont: true });

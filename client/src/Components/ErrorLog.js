@@ -193,7 +193,7 @@ export default function ErrorLog(props) {
                 loading={loading}
                 type="submit"
                 onClick={() => {
-                  console.log("selam");
+                  //getting the defect position from local storage that has been stored before to log
                   formik.setValues({
                     ...formik.values,
                     defectX: localStorage.getItem("defectEntryCursorPosX"),
