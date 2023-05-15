@@ -30,6 +30,8 @@ export default function DefectEntryImage(props) {
     const localY = event.clientY - bounds.top;
 
     setLocalMousePos({ x: localX, y: localY });
+    localStorage.setItem("defectEntryCursorPosX", cursorPos.x);
+    localStorage.setItem("defectEntryCursorPosY", cursorPos.y);
   };
 
   //the function that handles if the clicked box has child image if not then the defect positioning will be activated

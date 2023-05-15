@@ -254,9 +254,11 @@ export default function ErrorEntry() {
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
-                    onClick={() =>
-                      setBooleans({ ...booleans, showErrorList: true })
-                    }
+                    onClick={() => {
+                      setBooleans({ ...booleans, showErrorList: true });
+                      localStorage.removeItem("defectEntryCursorPosX");
+                      localStorage.removeItem("defectEntryCursorPosY");
+                    }}
                     href={`/terminal/defcorrect/${params.depCode}/${params.filterCode}`}
                   >
                     {t("defectList").toUpperCase()}
@@ -270,7 +272,11 @@ export default function ErrorEntry() {
                   <Button
                     sx={{ ...buttonStyle(115, 70), marginLeft: 1 }}
                     variant="outlined"
-                    onClick={() => setBooleans({ ...booleans, bigFont: true })}
+                    onClick={() => {
+                      localStorage.removeItem("defectEntryCursorPosX");
+                      localStorage.removeItem("defectEntryCursorPosY");
+                      setBooleans({ ...booleans, bigFont: true });
+                    }}
                   >
                     {t("bigFont").toUpperCase()}
                   </Button>
