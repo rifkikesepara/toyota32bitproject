@@ -56,7 +56,7 @@ export default function ErrorEntry() {
 
   const [screenData, setScreenData] = useState([]);
   useGetData(autoArrangewithID(), 1000, setScreenData); //getting image data from the server
-  const headerData = useGetDataOnce(API.link + "/header", true); //getting the header data from the server
+  const headerData = useGetDataOnce(API.link + "/header"); //getting the header data from the server
 
   //button styling function to customize button on the error entry panel
   const buttonStyle = (width, height) => {

@@ -34,8 +34,8 @@ export default function LogIN() {
     navigate: false,
   });
 
-  const terminalList = useGetData(API.link + "/login", 500); //fetching terminals data
-  const shifts = useGetData(API.link + "/shifts", 500); //fetching shift data
+  const terminalList = useGetDataOnce(API.link + "/login"); //fetching terminals data
+  const shifts = useGetDataOnce(API.link + "/shifts"); //fetching shift data
 
   let params = useParams();
   useGetDataOnce(API.link + "/terminals", true, (response) => {
