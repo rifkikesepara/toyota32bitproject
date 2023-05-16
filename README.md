@@ -70,3 +70,18 @@ Instead, it will copy all the configuration files and the transitive dependencie
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
 .io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+---
+
+### External Libraries
+
+- Material UI
+- react-router-dom
+- react-simple-keyboard
+- formik
+- axios
+- dayjs
+- yup
+- react-lineto
+- react-virtuoso
+- react-i18next
