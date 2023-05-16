@@ -127,3 +127,30 @@ This component is used for rending the data that contains almost over 1000 objec
 |setScrollerRef|_function(ref)_|The function that sets the reference of the table's scroller|
 |style|_object_|`Defines the style of the table.`|
 |isRefreshed|_function_|`Returns true if the user clicks the refresh button on the table.`
+
+---
+
+# Custom Hooks
+
+### \*useGetData
+
+This hook is used for fetching data from an api at certain time intervals. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the fetching time so data will be fetched slower or faster by whatever time you changed. Returns the fetched data.
+
+    useGetData(url: string, timeout: number, then: function)
+
+---
+
+### \*useGetDataOnce
+
+This hook is used for fetching data for once depending on the value that you give the hook. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the dependency value so that data will be fetched one more time. Return the fetched data.
+
+    useGetDataOnce(url: string, dependency: any, then: function)
+
+---
+
+### \*useAlert
+
+This hook gives you the ability to access the alert component's context so that you can manipulate variables of alert such as messeage type **(success, error)** , alert message, alert duration and the thing that you want to do after alert is finished
+
+    const{setAlert} = useAlert();
+    setAlert(message: string, type: string, duration: number, onFinish: function);

@@ -36,31 +36,6 @@ If you do this steps properly you will be okay. You can enjoy the application :)
 
 If you want to use your own backend server for this application there is a json file called **api.json** you can change the url value whatever your server uses. After changing the api url app will adapt immediately.
 
-## Custom Hooks
-
-### \*useGetData
-
-This hook is used for fetching data from an api at certain time intervals. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the fetching time so data will be fetched slower or faster by whatever time you changed. Returns the fetched data.
-
-    useGetData(url: string, timeout: number, then: function)
-
----
-
-### \*useGetDataOnce
-
-This hook is used for fetching data for once depending on the value that you give the hook. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the dependency value so that data will be fetched one more time. Return the fetched data.
-
-    useGetDataOnce(url: string, dependency: any, then: function)
-
----
-
-### \*useAlert
-
-This hook gives you the ability to access the alert component's context so that you can manipulate variables of alert such as messeage type **(success, error)** , alert message, alert duration and the thing that you want to do after alert is finished
-
-    const{setAlert} = useAlert();
-    setAlert(message: string, type: string, duration: number, onFinish: function);
-
 ## Available Scripts
 
 In the project directory, you can run:
