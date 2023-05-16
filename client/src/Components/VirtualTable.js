@@ -510,7 +510,6 @@ export default function VirtualTable(props) {
           }}
           onChange={(value) => {
             filterData(value);
-            if (props.onFilters) props.onFilters(filter);
           }}
           onBlur={() => setFilterWindow({ ...filterWindow, open: false })}
           placeholder={filterWindow.name}
