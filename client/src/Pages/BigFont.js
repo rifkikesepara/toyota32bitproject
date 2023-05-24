@@ -184,12 +184,12 @@ export default function BigFont(props) {
             variant="contained"
             sx={{ width: 250, height: 65, marginBottom: "50px" }}
             onClick={() =>
-              props.setBooleans({ ...props.booleans, errorLog: true })
+              props.setBooleans({ ...props.booleans, bigFont: false })
             }
           >
             {t("defectEntry").toUpperCase()}
           </Button>
-          <ErrorLog
+          {/* <ErrorLog
             open={props.booleans.errorLog}
             openFunc={(bool) =>
               props.setBooleans({ ...props.booleans, errorLog: bool })
@@ -201,7 +201,7 @@ export default function BigFont(props) {
                 errorLog: bool ? false : true,
               })
             }
-          />
+          /> */}
           <h1>{t("assemblyNo").toUpperCase()}</h1>
           <TextField
             sx={{

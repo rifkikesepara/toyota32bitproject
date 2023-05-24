@@ -67,7 +67,7 @@ export default function CustomMenu(props) {
                   backgroundColor: "#ffc840",
                 },
               }}
-              onClick={() => props.onClick(defects.defectId)}
+              onClick={() => props.onClick(defects)}
             >
               {defects.defectName}
             </MenuItem>

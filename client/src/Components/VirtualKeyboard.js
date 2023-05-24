@@ -12,7 +12,7 @@ export default function VirtualKeyboard(props) {
 
   const divRef = useRef(); //getting virtual keyboard's container div reference to determine whether the user cliked the outside of the div or not
 
-  const textAreaRef = useRef(); //getting the text area refrerence to scroll down if the user's input is not fitting the text area anymore
+  const textAreaRef = useRef(null); //getting the text area refrerence to scroll down if the user's input is not fitting the text area anymore
 
   const [layoutName, setLayoutName] = useState("default"); //layout name to switch different keyboard layout
 
@@ -33,7 +33,7 @@ export default function VirtualKeyboard(props) {
 
   //the function that executes whenever user clicks a button on the virtual keyboard
   const onChangeAll = (inputs) => {
-    textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
+    // textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
     if (props.onChange) props.onChange(inputs);
 
     //setting text field value that is outside of the component
@@ -59,45 +59,57 @@ export default function VirtualKeyboard(props) {
 
   //whenever virtual keyboard opens it syncronizes with the textfield's value
   useEffect(() => {
-    props.keyboard.current.setInput(props.inputRef.current);
+    if (props.onInit) props.onInit();
   }, []);
 
   return (
-    <div className="keyboard-container" style={{ ...props.style }}>
+    <div
+      style={{
+        ...props.style,
+        opacity: props.disabled && "0.4",
+        pointerEvents: props.disabled && "none",
+      }}
+    >
       <div
+        className="keyboard"
         ref={divRef}
         onBlur={() => {
-          props.onBlur();
-          props.inputRef.current = props.values[props.inputName];
+          if (props.onBlur) props.onBlur();
+          if (props.inputRef)
+            props.inputRef.current = props.values[props.inputName];
         }}
         tabIndex={100}
-        className="keyboard"
         style={{
           width: props.width,
           display: "flex",
           justifyContent: "center",
+          boxShadow: "none",
         }}
       >
-        <textarea
-          ref={textAreaRef}
-          style={{
-            width: "100%",
-            resize: "none",
-            fontSize: "20px",
-            border: "none",
-            outline: "none",
-            overflowY: "hidden",
-            zIndex: "200",
-          }}
-          wrap="true"
-          value={props.values[props.inputName]}
-        />
+        {false && (
+          <textarea
+            ref={textAreaRef}
+            style={{
+              width: "100%",
+              resize: "none",
+              fontSize: "20px",
+              border: "none",
+              outline: "none",
+              overflowY: "hidden",
+              zIndex: "200",
+            }}
+            wrap="true"
+            value={props.values[props.inputName]}
+          />
+        )}
         <Keyboard
           onInit={() => {
             divRef.current.focus();
           }}
           layout={adjustLayout()}
-          keyboardRef={(r) => (props.keyboard.current = r)}
+          keyboardRef={(r) => {
+            if (props.keyboard) props.keyboard.current = r;
+          }}
           inputName={props.inputName}
           display={{
             "{enter}": "Enter",

@@ -1,31 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Login.css";
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  TextField,
-  Button,
-  Skeleton,
-} from "@mui/material";
+import { Select, MenuItem, TextField, Button, Skeleton } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useParams, Navigate } from "react-router-dom";
-import { LocalizationProvider, MobileDatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/tr";
 import { useFormik } from "formik";
 import useGetData from "../Hooks/GetData";
 import CustomSelect from "../Components/CustomSelect";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import API from "../Resources/api.json";
-import CustomTextField from "../Components/CustomTextField";
 import useAlert from "../Hooks/useAlert";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
+import VirtualKeyboard from "../Components/VirtualKeyboard";
+import CustomDatePicker from "../Components/CustomDatePicker";
 
 export default function LogIN() {
-  const { t, i18n } = useTranslation(); //getting context for the localization on the page
+  const { t } = useTranslation(); //getting context for the localization on the page
   const { setAlert } = useAlert(); //getting context to pop the alert up whenever we need
+
+  const [inputName, setInputName] = useState("");
+  const [keyboardLayout, setKeyboardLayout] = useState("numeric");
+  const keyboard = useRef();
 
   const [depName, setDepName] = useState("");
   const [count, setCount] = React.useState(0);
@@ -58,13 +54,14 @@ export default function LogIN() {
   const [user] = useState({
     sicilno: 321,
     password: 12345,
-    assembleno: 770,
+    assembleno: 500,
   });
 
   //validation for the user information
   const validationSchema = yup.object({
     sicilno: yup.string().required(t("cantNullError")),
     password: yup.string().required(t("cantNullError")),
+    assembleno: yup.string().required(t("cantNullError")),
   });
 
   //the function that checks whether the user entered the right informations or not (checks with fake info)
@@ -154,52 +151,76 @@ export default function LogIN() {
               data={terminalList.data}
               count={count} //the terminal count according to the filter that the user has been selected
               value={formik.values.terminal}
-              onChange={formik.handleChange}
+              onChange={(event) => {
+                //TODO: change the assemble number considering selected terminal
+                formik.handleChange(event);
+              }}
               name="terminal"
             />
           </div>
           <div className="row">
             <p>{t("regNumber")}</p>
-            <CustomTextField
-              error={formik.touched.sicilno}
-              helperText={formik.errors.sicilno}
+            <TextField
+              sx={{ width: "65%" }}
               disabled={booleans.loading}
-              kayboardLayout="numeric"
-              keyboardWidth="20%"
+              error={formik.touched.sicilno}
+              // helperText={formik.errors.sicilno}
               autoComplete="off"
-              width="65%"
               name="sicilno"
-              setValues={formik.setValues}
-              values={formik.values}
-              iconPosition="rightInner"
+              value={formik.values.sicilno}
+              onChange={(event) => {
+                keyboard.current.setInput(event.target.value);
+                formik.handleChange(event);
+              }}
+              onFocus={(event) => {
+                setInputName(event.currentTarget.name);
+                setKeyboardLayout("numeric");
+              }}
             />
           </div>
           <div className="row">
             <p>{t("password")}</p>
-            <CustomTextField
+            <TextField
+              sx={{ width: "65%" }}
               disabled={booleans.loading}
               error={formik.touched.password}
-              helperText={formik.errors.password}
+              // helperText={formik.errors.password}
               autoComplete="off"
-              width="65%"
               name="password"
-              setValues={formik.setValues}
-              values={formik.values}
-              iconPosition="rightInner"
+              type="password"
+              value={formik.values.password}
+              onChange={(event) => {
+                keyboard.current.setInput(event.target.value);
+                formik.handleChange(event);
+              }}
+              onFocus={(event) => {
+                setInputName(event.currentTarget.name);
+                setKeyboardLayout("normal");
+              }}
             />
           </div>
           <div className="row">
             <p>{t("assemblyNo")}</p>
             <TextField
+              disabled={booleans.loading}
               className="TextField"
               name="assembleno"
+              error={formik.touched.assembleno}
               sx={{ minWidth: "65%" }}
-              disabled={true}
+              autoComplete="off"
               variant="outlined"
               placeholder="123"
-              value={findAssyNo()}
+              value={formik.values.assembleno}
               inputProps={{
                 maxLength: 3,
+              }}
+              onChange={(event) => {
+                keyboard.current.setInput(event.target.value);
+                formik.handleChange(event);
+              }}
+              onFocus={(event) => {
+                setInputName(event.currentTarget.name);
+                setKeyboardLayout("numeric");
               }}
             />
           </div>
@@ -217,21 +238,10 @@ export default function LogIN() {
             }}
           >
             <p>{t("date")}</p>
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-              adapterLocale={i18n.language}
-            >
-              <MobileDatePicker
-                orientation="landscape"
-                disabled={booleans.loading}
-                name="date"
-                value={formik.values.date}
-                onChange={(newValue) => {
-                  formik.values.date = newValue;
-                }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
+            <CustomDatePicker
+              disabled={booleans.loading}
+              date={(date) => (formik.values.date = date)}
+            />
 
             <p>{t("shift")}</p>
             <Select
@@ -257,8 +267,9 @@ export default function LogIN() {
               sx={{
                 width: "100%",
                 height: "70px",
-                margin: "15px",
                 fontSize: "20px",
+                marginTop: "5px",
+                marginInline: "7px",
               }}
               variant="contained"
             >
@@ -271,8 +282,9 @@ export default function LogIN() {
               sx={{
                 height: "70px",
                 width: "100%",
-                margin: "15px",
                 fontSize: "20px",
+                marginTop: "5px",
+                marginInline: "7px",
               }}
               href="/terminals"
               variant="contained"
@@ -280,6 +292,22 @@ export default function LogIN() {
               {t("close")}
             </Button>
           </div>
+          <VirtualKeyboard
+            keyboard={keyboard}
+            disabled={booleans.loading}
+            layout={keyboardLayout}
+            width={keyboardLayout != "numeric" ? "100%" : "50%"}
+            helperText="false"
+            style={{
+              display: "flex",
+              width: "100%",
+              justifyContent: "center",
+              boxShadow: "none",
+            }}
+            values={formik.values}
+            setValues={formik.setValues}
+            inputName={inputName}
+          />
         </form>
       </div>
     </>

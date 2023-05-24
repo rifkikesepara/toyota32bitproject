@@ -47,13 +47,13 @@ export default function ErrorList() {
   //table columns to be shown up on the table
   const columns = [
     {
-      width: "3%",
+      width: "4.2%",
       label: t("notifier").toUpperCase(),
       dataKey: "depCode",
       numeric: true,
     },
     {
-      width: "4.2%",
+      width: "3.0%",
       label: "Body",
       dataKey: "bodyNo",
       numeric: true,
@@ -95,7 +95,7 @@ export default function ErrorList() {
       numeric: true,
     },
     {
-      width: "3.5%",
+      width: "3.0%",
       label: "Spot",
       dataKey: "spotId",
       numeric: true,
@@ -125,7 +125,7 @@ export default function ErrorList() {
       numeric: true,
     },
     {
-      width: "2%",
+      width: "2.5%",
       label: "Rank",
       dataKey: "defrankCode",
       numeric: true,
@@ -235,6 +235,7 @@ export default function ErrorList() {
                   borderRadius: "5px",
                   border: "1px solid black",
                 }}
+                keyboardSX={{ bottom: 0 }}
                 width={200}
                 name="filterNo"
                 setValues={setFilterWord}
@@ -260,6 +261,7 @@ export default function ErrorList() {
               style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                keyboardSX={{ bottom: 0 }}
                 kayboardLayout="numeric"
                 keyboardWidth="25%"
                 placeholder={t("bodyNo").toUpperCase()}

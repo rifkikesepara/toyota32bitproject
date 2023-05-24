@@ -114,16 +114,16 @@ export default function DefectEntryImage(props) {
                     anchorEl={selectDefect.anchorEl}
                     onClose={() => {
                       setSelectDefect({ enabled: false, anchorEl: 0 });
-                      props.setSelectedDefect("");
+                      props.setSelectedDefect(null, null);
                     }}
                     data={props.data[0].arcDefects}
-                    onClick={(id) => {
+                    onClick={(event) => {
                       setSelectDefect({
                         enabled: false,
                         anchorEl: 0,
-                        value: id,
+                        value: event.defectId,
                       });
-                      props.setSelectedDefect(data.labelText);
+                      props.setSelectedDefect(data.labelText, event.defectName);
                     }}
                   />
                 </div>

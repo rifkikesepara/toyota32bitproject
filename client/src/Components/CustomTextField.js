@@ -73,6 +73,7 @@ export default function CustomTextField(props) {
 
       {bools.showKeyboard && (
         <VirtualKeyboard
+          onInit={() => keyboard.current.setInput(inputRef.current)}
           onBlur={() => {
             //if the user clicks outside of the virtual keyboard close it
             setBools({ ...bools, showKeyboard: false });
@@ -80,6 +81,11 @@ export default function CustomTextField(props) {
           }}
           style={{
             ...props.keyboardSX,
+            position: "absolute",
+            justifyContent: "center",
+            left: 0,
+            zIndex: 1000,
+            width: "100%",
             display: bools.showKeyboard ? "flex" : "none",
             marginTop: bools.showKeyboard ? 700 : 0,
           }}

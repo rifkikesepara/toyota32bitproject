@@ -56,5 +56,9 @@
   "deleteDefectAlert": "Hata Silindi",
   "refreshAlert": "Yenilendi",
   "saveAlert": "Kaydedildi",
-  "cantNullError": "Boş olamaz"
+  "cantNullError": "Boş olamaz",
+  "clearFilters": "Filtreleri Temizle",
+  "yes": "Evet",
+  "no": "Hayır",
+  "areYouSureDelete": "Silmek istediğinize emin misiniz?"
 }

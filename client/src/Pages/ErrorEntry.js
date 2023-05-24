@@ -202,7 +202,9 @@ export default function ErrorEntry() {
                           data={screenData.data}
                           setPicture={setPicture}
                           setData={setScreenData}
-                          setSelectedDefect={setSelectedDefect}
+                          setSelectedDefect={(label, defect) =>
+                            setSelectedDefect({ label: label, defect: defect })
+                          }
                         />
                       );
                     }
@@ -371,21 +373,33 @@ export default function ErrorEntry() {
                     />
                   </div>
                   <Button
-                    disabled={selectedDefect ? false : true}
+                    disabled={
+                      selectedDefect && selectedDefect.label != null
+                        ? false
+                        : true
+                    }
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
                     {t("quickSave").toUpperCase()}
                   </Button>
                   <Button
-                    disabled={selectedDefect ? false : true}
+                    disabled={
+                      selectedDefect && selectedDefect.label != null
+                        ? false
+                        : true
+                    }
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                   >
                     {t("saveAndSkip").toUpperCase()}
                   </Button>
                   <Button
-                    disabled={selectedDefect ? false : true}
+                    disabled={
+                      selectedDefect && selectedDefect.label != null
+                        ? false
+                        : true
+                    }
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
                     onClick={() => {
@@ -397,13 +411,16 @@ export default function ErrorEntry() {
                   <ErrorLog
                     open={booleans.errorLog}
                     openFunc={setBooleans}
-                    isSaved={(bool) =>
+                    isSaved={(bool) => {
                       setBooleans({
                         ...booleans,
                         defectLogged: bool,
                         errorLog: bool ? false : true,
-                      })
-                    }
+                      });
+                      setScreenData([]);
+                      setSelectedDefect();
+                      setPicture(screenData.data[0].motherPictureId);
+                    }}
                   />
                   <h1 style={{ marginTop: 4 }}>
                     {t("assemblyNo").toUpperCase()}
@@ -428,6 +445,11 @@ export default function ErrorEntry() {
                   <Button
                     sx={{ ...buttonStyle(250, 70), marginTop: 1 }}
                     variant="outlined"
+                    onClick={() => {
+                      setScreenData([]);
+                      setPicture(71835);
+                      setSelectedDefect();
+                    }}
                   >
                     {t("terminalFirstPic").toUpperCase()}
                   </Button>
@@ -447,7 +469,11 @@ export default function ErrorEntry() {
               </div>
             </div>
             {/*shows up whenever user selects a defect*/}
-            <h2 style={{ margin: 0 }}>{selectedDefect}</h2>{" "}
+            <h2>
+              {selectedDefect && selectedDefect.label}
+              {selectedDefect && selectedDefect.label ? " || " : ""}
+              {selectedDefect && selectedDefect.defect}
+            </h2>
           </div>
         </div>
       )}

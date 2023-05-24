@@ -11,7 +11,14 @@ import Paper from "@mui/material/Paper";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Button, CircularProgress } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  NativeSelect,
+  Select,
+} from "@mui/material";
 import useAlert from "../Hooks/useAlert";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LoadingButton from "@mui/lab/LoadingButton/LoadingButton";
@@ -19,11 +26,17 @@ import { useTranslation } from "react-i18next";
 import SearchIcon from "@mui/icons-material/Search";
 import CustomTextField from "./CustomTextField";
 import CloseIcon from "@mui/icons-material/Close";
+import useGetDataOnce from "../Hooks/GetDataOnce";
+import API from "../Resources/api.json";
 
 export default function VirtualTable(props) {
   const { t } = useTranslation(); //getting context for the localization
   const { setAlert } = useAlert(); //getting context to execute alerts
 
+  const [nrReasonData, setNrReasonData] = useState([]);
+  useGetDataOnce(API.link + "/errList", true, (data) => {
+    setNrReasonData(data.data[0].nrReasonList);
+  });
   const [virtualTableData, setVirtualTableData] = useState(); //the main data that will be shown on the table
   const [virtualTableDataTemp, setVirtualTableDataTemp] = useState(); //the temp data that will be used when the filtering happens
 
@@ -40,6 +53,11 @@ export default function VirtualTable(props) {
   const [filterWindow, setFilterWindow] = useState({
     open: false,
     filtered: false,
+  });
+
+  const [deleteDialogWindow, setDeleteDialogWindow] = useState({
+    open: false,
+    row: null,
   });
 
   //the state that will store filtering words as an object
@@ -324,16 +342,21 @@ export default function VirtualTable(props) {
       case "nrReasonId":
         return (
           <div style={{ width: "100%" }}>
-            <select
+            <NativeSelect
+              sx={{ backgroundColor: "white" }}
+              key={0}
               disabled={loading.delete || loading.save || loading.refresh}
               style={{ width: "90%", height: "30px" }}
               name="example"
+              value={row["nrReasonId"]}
             >
-              <option value=""></option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="-">Other</option>
-            </select>
+              <option value={0}></option>
+              {nrReasonData.map((data, _index) => (
+                <option key={_index} value={data.nrId}>
+                  {data.nrReasonAbb}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
         );
       case "rgbCode":
@@ -388,14 +411,12 @@ export default function VirtualTable(props) {
               }}
               variant="contained"
               onClick={() => {
-                setLoading({
-                  ...loading,
-                  delete: true,
-                  buttonId: _index,
-                });
                 scrollerTopRef.current = sclrf.current.scrollTop;
-                setAlert(t("deleteDefectAlert"), "success", 2000, () => {
-                  deleteRow(row);
+                setDeleteDialogWindow({
+                  ...deleteDialogWindow,
+                  open: true,
+                  row: row,
+                  buttonId: _index,
                 });
               }}
             >
@@ -496,6 +517,60 @@ export default function VirtualTable(props) {
           </div>
         )}
       </Paper>
+      <Dialog
+        // sx={{ backdropFilter: "blur(0.2px)" }}
+        onClose={() => {
+          //if user clicks outside of the div close the dialog window
+          setDeleteDialogWindow({ ...deleteDialogWindow, open: false });
+        }}
+        sx={{ overflow: "hidden" }}
+        open={deleteDialogWindow.open}
+        maxWidth="xl"
+        PaperProps={{ sx: { overflow: "visible" } }}
+      >
+        <DialogContent sx={{ backgroundColor: "#ffc840" }}>
+          <h2>{t("areYouSureDelete")}</h2>
+          <div
+            className="row"
+            style={{ width: "100%", margin: 0, justifyContent: "center" }}
+          >
+            <Button
+              disabled={loading.delete}
+              variant="contained"
+              sx={{ width: 100, height: 50, marginRight: "2px" }}
+              onClick={() => {
+                setLoading({
+                  ...loading,
+                  delete: true,
+                  buttonId: deleteDialogWindow.buttonId,
+                });
+                setAlert(t("deleteDefectAlert"), "success", 2000, () => {
+                  deleteRow(deleteDialogWindow.row);
+                });
+                setDeleteDialogWindow({ ...deleteDialogWindow, open: false });
+              }}
+            >
+              {t("yes")}
+            </Button>
+            <Button
+              disabled={loading.delete}
+              variant="contained"
+              color="error"
+              sx={{ width: 100, height: 50, marginLeft: "2px" }}
+              onClick={() => {
+                setDeleteDialogWindow({ ...deleteDialogWindow, open: false });
+                setLoading({
+                  ...loading,
+                  delete: false,
+                  buttonId: 0,
+                });
+              }}
+            >
+              {t("no")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div
         className="virtualTableTextFieldContainer"
@@ -523,7 +598,6 @@ export default function VirtualTable(props) {
             borderRadius: "5px",
             border: "1px solid black",
           }}
-          width={100}
           name={filterWindow.name}
           setValues={setFilter}
           values={filter}
@@ -533,6 +607,7 @@ export default function VirtualTable(props) {
 
       <p
         style={{
+          position: "relative",
           border: "1px solid black",
           width: "100%",
           textAlign: "right",
@@ -543,11 +618,18 @@ export default function VirtualTable(props) {
         {filterWindow.filtered && (
           <Button
             sx={{
-              padding: "1px",
-              color: "black",
-              borderRadius: "100px",
-              height: "20px",
-              minWidth: "10px",
+              ...buttonStyle("rgba(0, 0, 0, 0.9)"),
+              position: "absolute",
+              bottom: 0,
+              width: 200,
+              left: -10,
+              zIndex: 500,
+              padding: 2,
+              borderTopLeftRadius: "0px",
+              borderBottomLeftRadius: "0px",
+              borderTopRightRadius: "20px",
+              borderBottomRightRadius: "0px",
+              fontSize: "0.7vw",
             }}
             onClick={() => {
               //removing all the filters
@@ -556,7 +638,9 @@ export default function VirtualTable(props) {
               setVirtualTableData(virtualTableDataTemp);
               setFilter("");
             }}
+            variant="contained"
           >
+            {t("clearFilters")}
             <CloseIcon sx={{ fontSize: "20px" }} />
           </Button>
         )}
@@ -578,6 +662,7 @@ export default function VirtualTable(props) {
             setAlert(t("refreshAlert"), "success", 2000, () => {
               setLoading({ ...loading, refresh: false });
               setVirtualTableData(props.data);
+              setVirtualTableDataTemp(props.data);
             });
 
             //setting the value of scrollTop to remain the scroller where the user scrolled after refresh the data

@@ -4,8 +4,9 @@ import {
   Dialog,
   DialogContent,
   FormControlLabel,
+  TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CustomSelect from "./CustomSelect";
 import { useFormik } from "formik";
 import API from "../Resources/api.json";
@@ -15,6 +16,7 @@ import LoadingButton from "@mui/lab/LoadingButton/LoadingButton";
 import axios from "axios";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import { useTranslation } from "react-i18next";
+import VirtualKeyboard from "./VirtualKeyboard";
 
 export default function ErrorLog(props) {
   const { t } = useTranslation(); //getting context for the localization on the page
@@ -22,6 +24,9 @@ export default function ErrorLog(props) {
 
   const [dataFetched, setDataFetched] = useState(false); //boolean to detect whether data is fetched or not
   const [loading, setLoading] = useState(false);
+
+  const keyboard = useRef();
+  const [inputName, setInputName] = useState();
 
   const errDetail = useGetDataOnce(API.link + "/errDetail", true, (data) => {
     setDataFetched(true);
@@ -78,7 +83,7 @@ export default function ErrorLog(props) {
                 margin: 0,
                 justifyContent: "space-between",
                 width: "100%",
-                marginBlock: "5px",
+                marginBlock: "2px",
               }}
             >
               <h2>CVQS (TMMT)</h2>
@@ -90,7 +95,7 @@ export default function ErrorLog(props) {
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <div
                 className="row"
@@ -98,7 +103,7 @@ export default function ErrorLog(props) {
                   width: "50%",
                   justifyContent: "space-between",
                   margin: 0,
-                  marginBlock: "5px",
+                  marginBlock: "2px",
                 }}
               >
                 <h2>{t("defectResponsible")}</h2>
@@ -149,7 +154,7 @@ export default function ErrorLog(props) {
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <div
                 className="row"
@@ -221,7 +226,7 @@ export default function ErrorLog(props) {
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <h2>Exit Department</h2>
               <CustomSelect
@@ -248,43 +253,45 @@ export default function ErrorLog(props) {
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <h2>{t("explanation")}</h2>
-              <CustomTextField
+              <TextField
                 disabled={loading}
                 autoComplete="off"
                 name="explain"
-                width="80%"
+                sx={{ width: "80%" }}
                 placeholder="Örnek Açıklama"
-                setValues={formik.setValues}
-                values={formik.values}
-                keyboardWidth="100%"
-                keyboardSX={{ bottom: -350 }}
-                iconPosition="left"
+                value={formik.values.explain}
+                onChange={(event) => {
+                  keyboard.current.setInput(event.target.value);
+                  formik.handleChange(event);
+                }}
+                onFocus={(event) => setInputName(event.target.name)}
               />
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <h2 style={{ color: "red" }}>{t("doneWork")}*</h2>
-              <CustomTextField
+              <TextField
                 disabled={loading}
                 autoComplete="off"
                 name="process"
-                width="80%"
+                sx={{ width: "80%" }}
                 placeholder="Örnek İşlem"
-                setValues={formik.setValues}
-                values={formik.values}
-                keyboardWidth="100%"
-                keyboardSX={{ bottom: -390 }}
-                iconPosition="left"
+                value={formik.values.process}
+                onChange={(event) => {
+                  keyboard.current.setInput(event.target.value);
+                  formik.handleChange(event);
+                }}
+                onFocus={(event) => setInputName(event.target.name)}
               />
             </div>
             <div
               className="row"
-              style={{ width: "100%", margin: 0, marginBlock: "5px" }}
+              style={{ width: "100%", margin: 0, marginBlock: "2px" }}
             >
               <h2 style={{ color: "red" }}>{t("otherResponsible")}*</h2>
               <CustomSelect
@@ -309,6 +316,21 @@ export default function ErrorLog(props) {
               />
             </div>
           </div>
+          <VirtualKeyboard
+            disabled={loading}
+            keyboard={keyboard}
+            inputName={inputName}
+            width="100%"
+            helperText="false"
+            style={{
+              display: "flex",
+              width: "100%",
+              justifyContent: "center",
+              boxShadow: "none",
+            }}
+            values={formik.values}
+            setValues={formik.setValues}
+          />
         </form>
       </DialogContent>
     </Dialog>

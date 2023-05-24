@@ -56,5 +56,9 @@
   "deleteDefectAlert": "Defect has been deleted",
   "refreshAlert": "Refreshed",
   "saveAlert": "Saved",
-  "cantNullError": "Cannot be empty"
+  "cantNullError": "Cannot be empty",
+  "clearFilters": "Clear Filters",
+  "yes": "Yes",
+  "no": "No",
+  "areYouSureDelete": "Are you sure that you want to delete?"
 }
