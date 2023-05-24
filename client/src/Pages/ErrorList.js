@@ -74,7 +74,7 @@ export default function ErrorList() {
       width: "4.2%",
       label: t("color").toUpperCase(),
       dataKey: "rgbCode",
-      numeric: false,
+      numeric: true,
     },
     {
       width: "3.2%",
@@ -227,6 +227,7 @@ export default function ErrorList() {
               style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                autoComplete="off"
                 placeholder={t("assemblyNo").toUpperCase()}
                 kayboardLayout="numeric"
                 keyboardWidth="25%"
@@ -261,6 +262,7 @@ export default function ErrorList() {
               style={{ margin: 0, width: "100%", justifyContent: "center" }}
             >
               <CustomTextField
+                autoComplete="off"
                 keyboardSX={{ bottom: 0 }}
                 kayboardLayout="numeric"
                 keyboardWidth="25%"

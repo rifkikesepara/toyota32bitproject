@@ -28,6 +28,7 @@ import CustomTextField from "./CustomTextField";
 import CloseIcon from "@mui/icons-material/Close";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import API from "../Resources/api.json";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function VirtualTable(props) {
   const { t } = useTranslation(); //getting context for the localization
@@ -53,6 +54,10 @@ export default function VirtualTable(props) {
   const [filterWindow, setFilterWindow] = useState({
     open: false,
     filtered: false,
+    sorted: false,
+    sortedColumn: "",
+    showSearchIcon: false,
+    sortDirection: 0,
   });
 
   const [deleteDialogWindow, setDeleteDialogWindow] = useState({
@@ -80,6 +85,13 @@ export default function VirtualTable(props) {
 
   //SORTING FUNCTION
   function sort(column) {
+    setFilterWindow({
+      ...filterWindow,
+      sorted: true,
+      sortedColumn: column.label,
+      sortDirection: filterWindow.sortDirection + 1,
+    });
+
     let sortingData;
     if (virtualTableData) sortingData = virtualTableData;
     else sortingData = props.data;
@@ -88,13 +100,25 @@ export default function VirtualTable(props) {
     if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
     else sortingFactor = column.dataKey;
 
-    //sorting the data in ascending order
-    const data = sortingData.sort((a, b) => {
-      return a[sortingFactor]
-        .toString()
-        .localeCompare(b[sortingFactor].toString());
-    });
-    setVirtualTableData(data);
+    let sortedData;
+
+    if (filterWindow.sortDirection % 2 == 0) {
+      //sorting the data in ascending order
+      sortedData = sortingData.sort((a, b) => {
+        return a[sortingFactor]
+          .toString()
+          .localeCompare(b[sortingFactor].toString());
+      });
+    } else {
+      //sorting the data in descending order
+      sortedData = sortingData.sort((a, b) => {
+        return b[sortingFactor]
+          .toString()
+          .localeCompare(a[sortingFactor].toString());
+      });
+    }
+
+    setVirtualTableData(sortedData);
     setLoading(!loading);
   }
 
@@ -259,26 +283,55 @@ export default function VirtualTable(props) {
                 zIndex: "0",
               }}
               onClick={(e) => {
-                sort(column);
+                if (column.numeric) sort(column);
                 scrollerTopRef.current = sclrf.current.scrollTop;
               }}
             >
-              {column.label}
+              <h5 style={{ fontSize: "auto" }}>{column.label}</h5>
+              {column.numeric &&
+                filterWindow.sorted &&
+                column.label == filterWindow.sortedColumn && (
+                  <ArrowDownwardIcon
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      transform:
+                        filterWindow.sortDirection % 2 == 0
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                    }}
+                  />
+                )}
             </Button>
             {column.numeric && (
               <SearchIcon
+                className="searchIcon"
                 sx={{
                   position: "absolute",
                   zIndex: "50000",
-                  bottom: 0,
-                  left: 0,
+                  right: 0,
                 }}
                 onClick={() => {
-                  setFilterWindow({
-                    ...filterWindow,
-                    name: column.dataKey,
-                    open: !filterWindow.open,
-                  });
+                  if (!filterWindow.open)
+                    setFilterWindow({
+                      ...filterWindow,
+                      open: true,
+                      name: column.dataKey,
+                    });
+                  else if (
+                    filterWindow.open &&
+                    filterWindow.name != column.dataKey
+                  ) {
+                    setFilterWindow({
+                      ...filterWindow,
+                      name: column.dataKey,
+                    });
+                  } else if (
+                    filterWindow.open &&
+                    filterWindow.name == column.dataKey
+                  )
+                    setFilterWindow({ ...filterWindow, open: false });
                   if (!filter[column.dataKey])
                     setFilter({ ...filter, [column.dataKey]: "" });
                   scrollerTopRef.current = sclrf.current.scrollTop;
@@ -312,12 +365,14 @@ export default function VirtualTable(props) {
                   style={
                     column.dataKey == "rgbCode"
                       ? {
-                          backgroundColor: row[column.dataKey],
                           borderRadius: "10px",
+                          backgroundColor: row["rgbCode"],
+                          borderRadius: "5px",
                           color:
-                            row[column.dataKey] == "#000000"
-                              ? "white"
-                              : "black",
+                            row["rgbCode"] == "#000000" ? "white" : "black",
+                          fontSize: "20px",
+                          paddingBlock: "4px",
+                          marginInline: "3px",
                         }
                       : {}
                   }
@@ -359,21 +414,21 @@ export default function VirtualTable(props) {
             </NativeSelect>
           </div>
         );
-      case "rgbCode":
-        return (
-          <div
-            style={{
-              backgroundColor: row["rgbCode"],
-              borderRadius: "5px",
-              color: row["rgbCode"] == "#000000" ? "white" : "black",
-              fontSize: "20px",
-              paddingBlock: "4px",
-              marginInline: "3px",
-            }}
-          >
-            {row["colorExtCode"]}
-          </div>
-        );
+      // case "rgbCode":
+      //   return (
+      //     <div
+      //       style={{
+      //         backgroundColor: row["rgbCode"],
+      //         borderRadius: "5px",
+      //         color: row["rgbCode"] == "#000000" ? "white" : "black",
+      //         fontSize: "20px",
+      //         paddingBlock: "4px",
+      //         marginInline: "3px",
+      //       }}
+      //     >
+      //       {row["colorExtCode"]}
+      //     </div>
+      //   );
       case "edit":
         return (
           <div
@@ -579,6 +634,7 @@ export default function VirtualTable(props) {
         }}
       >
         <CustomTextField
+          autoComplete="off"
           className="virtualTableTextField"
           onClose={() => {
             setFilterWindow({ ...filterWindow, open: false });
@@ -602,6 +658,10 @@ export default function VirtualTable(props) {
           setValues={setFilter}
           values={filter}
           iconPosition="rightInner"
+        />
+        <CloseIcon
+          onClick={() => setFilterWindow({ ...filterWindow, open: false })}
+          sx={{ fontSize: "50px", cursor: "pointer" }}
         />
       </div>
 
@@ -633,7 +693,11 @@ export default function VirtualTable(props) {
             }}
             onClick={() => {
               //removing all the filters
-              setFilterWindow({ ...filterWindow, filtered: false });
+              setFilterWindow({
+                ...filterWindow,
+                filtered: false,
+                open: false,
+              });
               props.isFiltered(false);
               setVirtualTableData(virtualTableDataTemp);
               setFilter("");
