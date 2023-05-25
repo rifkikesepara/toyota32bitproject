@@ -17,7 +17,6 @@ import {
   Dialog,
   DialogContent,
   NativeSelect,
-  Select,
 } from "@mui/material";
 import useAlert from "../Hooks/useAlert";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -28,12 +27,13 @@ import CustomTextField from "./CustomTextField";
 import CloseIcon from "@mui/icons-material/Close";
 import useGetDataOnce from "../Hooks/GetDataOnce";
 import API from "../Resources/api.json";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function VirtualTable(props) {
   const { t } = useTranslation(); //getting context for the localization
   const { setAlert } = useAlert(); //getting context to execute alerts
 
-  const [nrReasonData, setNrReasonData] = useState([]);
+  const [nrReasonData, setNrReasonData] = useState([]); //storing the nrReasons data to show on the select component
   useGetDataOnce(API.link + "/errList", true, (data) => {
     setNrReasonData(data.data[0].nrReasonList);
   });
@@ -53,8 +53,12 @@ export default function VirtualTable(props) {
   const [filterWindow, setFilterWindow] = useState({
     open: false,
     filtered: false,
+    sorted: false,
+    sortedColumn: "",
+    sortDirection: 0, //if the number is even data will be sorted by ascending order otherwise it will be descending order
   });
 
+  //the dialog window variables for confirmation to delete the data
   const [deleteDialogWindow, setDeleteDialogWindow] = useState({
     open: false,
     row: null,
@@ -78,8 +82,35 @@ export default function VirtualTable(props) {
     };
   };
 
+  //the function that handles the changes that has been made on nr reason select
+  function handleNrReason(event, row) {
+    scrollerTopRef.current = sclrf.current.scrollTop; //remaining the same amount of scroll from the top
+    let data;
+    if (virtualTableData) data = virtualTableData;
+    else data = props.data;
+    const newState = data.map((data) => {
+      if (data == row) return { ...data, nrReasonId: event.target.value };
+      return data;
+    });
+    setVirtualTableData(newState);
+    if (virtualTableDataTemp) {
+      const temp = virtualTableDataTemp.map((data) => {
+        if (data == row) return { ...data, nrReasonId: event.target.value };
+        return data;
+      });
+      setVirtualTableDataTemp(temp);
+    }
+  }
+
   //SORTING FUNCTION
   function sort(column) {
+    setFilterWindow({
+      ...filterWindow,
+      sorted: true,
+      sortedColumn: column.label,
+      sortDirection: filterWindow.sortDirection + 1,
+    });
+
     let sortingData;
     if (virtualTableData) sortingData = virtualTableData;
     else sortingData = props.data;
@@ -88,13 +119,25 @@ export default function VirtualTable(props) {
     if (column.dataKey == "rgbCode") sortingFactor = "colorExtCode";
     else sortingFactor = column.dataKey;
 
-    //sorting the data in ascending order
-    const data = sortingData.sort((a, b) => {
-      return a[sortingFactor]
-        .toString()
-        .localeCompare(b[sortingFactor].toString());
-    });
-    setVirtualTableData(data);
+    let sortedData;
+
+    if (filterWindow.sortDirection % 2 == 0) {
+      //sorting the data in ascending order
+      sortedData = sortingData.sort((a, b) => {
+        return a[sortingFactor]
+          .toString()
+          .localeCompare(b[sortingFactor].toString());
+      });
+    } else {
+      //sorting the data in descending order
+      sortedData = sortingData.sort((a, b) => {
+        return b[sortingFactor]
+          .toString()
+          .localeCompare(a[sortingFactor].toString());
+      });
+    }
+
+    setVirtualTableData(sortedData);
     setLoading(!loading);
   }
 
@@ -104,11 +147,7 @@ export default function VirtualTable(props) {
 
     //getting the data except the row that the user wanted to delete
     function filterToDelete(data) {
-      return data.filter(({ cdate, formattedDefectHour }) => {
-        return (
-          formattedDefectHour != row.formattedDefectHour && cdate != row.cdate
-        );
-      });
+      return data.filter((data) => data != row);
     }
 
     //if data is not filtered yet we'll be using raw data to delete otherwise we'll use the data that has been filtered by user
@@ -259,26 +298,58 @@ export default function VirtualTable(props) {
                 zIndex: "0",
               }}
               onClick={(e) => {
-                sort(column);
+                if (column.numeric) sort(column);
                 scrollerTopRef.current = sclrf.current.scrollTop;
               }}
             >
-              {column.label}
+              <h5 style={{ fontSize: "auto" }}>{column.label}</h5>
+              {column.numeric &&
+                filterWindow.sorted &&
+                column.label == filterWindow.sortedColumn && (
+                  <ArrowDownwardIcon
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      transform:
+                        filterWindow.sortDirection % 2 == 0
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                    }}
+                  />
+                )}
             </Button>
             {column.numeric && (
               <SearchIcon
+                className="searchIcon"
                 sx={{
                   position: "absolute",
                   zIndex: "50000",
-                  bottom: 0,
-                  left: 0,
+                  right: 0,
                 }}
                 onClick={() => {
-                  setFilterWindow({
-                    ...filterWindow,
-                    name: column.dataKey,
-                    open: !filterWindow.open,
-                  });
+                  if (!filterWindow.open)
+                    setFilterWindow({
+                      ...filterWindow,
+                      open: true,
+                      name:
+                        column.dataKey == "rgbCode"
+                          ? "colorExtCode"
+                          : column.dataKey,
+                    });
+                  else if (
+                    filterWindow.open &&
+                    filterWindow.name != column.dataKey
+                  ) {
+                    setFilterWindow({
+                      ...filterWindow,
+                      name: column.dataKey,
+                    });
+                  } else if (
+                    filterWindow.open &&
+                    filterWindow.name == column.dataKey
+                  )
+                    setFilterWindow({ ...filterWindow, open: false });
                   if (!filter[column.dataKey])
                     setFilter({ ...filter, [column.dataKey]: "" });
                   scrollerTopRef.current = sclrf.current.scrollTop;
@@ -312,12 +383,14 @@ export default function VirtualTable(props) {
                   style={
                     column.dataKey == "rgbCode"
                       ? {
-                          backgroundColor: row[column.dataKey],
                           borderRadius: "10px",
+                          backgroundColor: row["rgbCode"],
+                          borderRadius: "5px",
                           color:
-                            row[column.dataKey] == "#000000"
-                              ? "white"
-                              : "black",
+                            row["rgbCode"] == "#000000" ? "white" : "black",
+                          fontSize: "20px",
+                          paddingBlock: "4px",
+                          marginInline: "3px",
                         }
                       : {}
                   }
@@ -344,11 +417,11 @@ export default function VirtualTable(props) {
           <div style={{ width: "100%" }}>
             <NativeSelect
               sx={{ backgroundColor: "white" }}
-              key={0}
               disabled={loading.delete || loading.save || loading.refresh}
               style={{ width: "90%", height: "30px" }}
               name="example"
               value={row["nrReasonId"]}
+              onChange={(e) => handleNrReason(e, row)}
             >
               <option value={0}></option>
               {nrReasonData.map((data, _index) => (
@@ -357,21 +430,6 @@ export default function VirtualTable(props) {
                 </option>
               ))}
             </NativeSelect>
-          </div>
-        );
-      case "rgbCode":
-        return (
-          <div
-            style={{
-              backgroundColor: row["rgbCode"],
-              borderRadius: "5px",
-              color: row["rgbCode"] == "#000000" ? "white" : "black",
-              fontSize: "20px",
-              paddingBlock: "4px",
-              marginInline: "3px",
-            }}
-          >
-            {row["colorExtCode"]}
           </div>
         );
       case "edit":
@@ -579,6 +637,7 @@ export default function VirtualTable(props) {
         }}
       >
         <CustomTextField
+          autoComplete="off"
           className="virtualTableTextField"
           onClose={() => {
             setFilterWindow({ ...filterWindow, open: false });
@@ -602,6 +661,10 @@ export default function VirtualTable(props) {
           setValues={setFilter}
           values={filter}
           iconPosition="rightInner"
+        />
+        <CloseIcon
+          onClick={() => setFilterWindow({ ...filterWindow, open: false })}
+          sx={{ fontSize: "50px", cursor: "pointer" }}
         />
       </div>
 
@@ -633,7 +696,11 @@ export default function VirtualTable(props) {
             }}
             onClick={() => {
               //removing all the filters
-              setFilterWindow({ ...filterWindow, filtered: false });
+              setFilterWindow({
+                ...filterWindow,
+                filtered: false,
+                open: false,
+              });
               props.isFiltered(false);
               setVirtualTableData(virtualTableDataTemp);
               setFilter("");

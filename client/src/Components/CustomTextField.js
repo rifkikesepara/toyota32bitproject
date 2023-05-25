@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material";
 import KeyboardAltTwoToneIcon from "@mui/icons-material/KeyboardAltTwoTone";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VirtualKeyboard from "./VirtualKeyboard";
 export default function CustomTextField(props) {
   //booleans to show keyboard
@@ -28,6 +28,7 @@ export default function CustomTextField(props) {
         style={{ ...props.style, minWidth: props.width, position: "relative" }}
       >
         <TextField
+          ref={props.textFieldRef}
           id={props.id}
           placeholder={props.placeholder}
           error={props.error && Boolean(props.error)}
@@ -45,6 +46,7 @@ export default function CustomTextField(props) {
             setBools({ ...bools, showIcon: true }); //show the keyboard icon to open the virtual keyboard
             inputRef.current = e.target.value;
           }}
+          variant="outlined"
         />
         {bools.showIcon && (
           <div

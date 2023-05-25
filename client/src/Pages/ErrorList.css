@@ -7,9 +7,23 @@
 }
 
 .virtualTableTextFieldContainer {
+  display: flex;
+  align-items: center;
   position: absolute;
   transition-property: margin-top;
   transition-duration: 1s;
   width: 100%;
   top: 8%;
+}
+
+@media only screen and (min-width: 1366px) {
+  .searchIcon {
+    bottom: 0;
+  }
+}
+
+@media only screen and (max-width: 1366px) {
+  .searchIcon {
+    top: 0;
+  }
 }
