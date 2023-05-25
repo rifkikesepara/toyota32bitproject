@@ -17,7 +17,6 @@ import {
   Dialog,
   DialogContent,
   NativeSelect,
-  Select,
 } from "@mui/material";
 import useAlert from "../Hooks/useAlert";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -34,7 +33,7 @@ export default function VirtualTable(props) {
   const { t } = useTranslation(); //getting context for the localization
   const { setAlert } = useAlert(); //getting context to execute alerts
 
-  const [nrReasonData, setNrReasonData] = useState([]);
+  const [nrReasonData, setNrReasonData] = useState([]); //storing the nrReasons data to show on the select component
   useGetDataOnce(API.link + "/errList", true, (data) => {
     setNrReasonData(data.data[0].nrReasonList);
   });
@@ -56,10 +55,10 @@ export default function VirtualTable(props) {
     filtered: false,
     sorted: false,
     sortedColumn: "",
-    showSearchIcon: false,
-    sortDirection: 0,
+    sortDirection: 0, //if the number is even data will be sorted by ascending order otherwise it will be descending order
   });
 
+  //the dialog window variables for confirmation to delete the data
   const [deleteDialogWindow, setDeleteDialogWindow] = useState({
     open: false,
     row: null,
@@ -82,6 +81,26 @@ export default function VirtualTable(props) {
       },
     };
   };
+
+  //the function that handles the changes that has been made on nr reason select
+  function handleNrReason(event, row) {
+    scrollerTopRef.current = sclrf.current.scrollTop; //remaining the same amount of scroll from the top
+    let data;
+    if (virtualTableData) data = virtualTableData;
+    else data = props.data;
+    const newState = data.map((data) => {
+      if (data == row) return { ...data, nrReasonId: event.target.value };
+      return data;
+    });
+    setVirtualTableData(newState);
+    if (virtualTableDataTemp) {
+      const temp = virtualTableDataTemp.map((data) => {
+        if (data == row) return { ...data, nrReasonId: event.target.value };
+        return data;
+      });
+      setVirtualTableDataTemp(temp);
+    }
+  }
 
   //SORTING FUNCTION
   function sort(column) {
@@ -128,11 +147,7 @@ export default function VirtualTable(props) {
 
     //getting the data except the row that the user wanted to delete
     function filterToDelete(data) {
-      return data.filter(({ cdate, formattedDefectHour }) => {
-        return (
-          formattedDefectHour != row.formattedDefectHour && cdate != row.cdate
-        );
-      });
+      return data.filter((data) => data != row);
     }
 
     //if data is not filtered yet we'll be using raw data to delete otherwise we'll use the data that has been filtered by user
@@ -317,7 +332,10 @@ export default function VirtualTable(props) {
                     setFilterWindow({
                       ...filterWindow,
                       open: true,
-                      name: column.dataKey,
+                      name:
+                        column.dataKey == "rgbCode"
+                          ? "colorExtCode"
+                          : column.dataKey,
                     });
                   else if (
                     filterWindow.open &&
@@ -399,11 +417,11 @@ export default function VirtualTable(props) {
           <div style={{ width: "100%" }}>
             <NativeSelect
               sx={{ backgroundColor: "white" }}
-              key={0}
               disabled={loading.delete || loading.save || loading.refresh}
               style={{ width: "90%", height: "30px" }}
               name="example"
               value={row["nrReasonId"]}
+              onChange={(e) => handleNrReason(e, row)}
             >
               <option value={0}></option>
               {nrReasonData.map((data, _index) => (
@@ -414,21 +432,6 @@ export default function VirtualTable(props) {
             </NativeSelect>
           </div>
         );
-      // case "rgbCode":
-      //   return (
-      //     <div
-      //       style={{
-      //         backgroundColor: row["rgbCode"],
-      //         borderRadius: "5px",
-      //         color: row["rgbCode"] == "#000000" ? "white" : "black",
-      //         fontSize: "20px",
-      //         paddingBlock: "4px",
-      //         marginInline: "3px",
-      //       }}
-      //     >
-      //       {row["colorExtCode"]}
-      //     </div>
-      //   );
       case "edit":
         return (
           <div

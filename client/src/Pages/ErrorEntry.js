@@ -260,8 +260,7 @@ export default function ErrorEntry() {
                       setBooleans({ ...booleans, showErrorList: true });
 
                       //removing the defect position due to user has been cancelled the process
-                      localStorage.removeItem("defectEntryCursorPosX");
-                      localStorage.removeItem("defectEntryCursorPosY");
+                      localStorage.removeItem("defectLog");
                     }}
                     href={`/terminal/defcorrect/${params.depCode}/${params.filterCode}`}
                   >
@@ -278,8 +277,7 @@ export default function ErrorEntry() {
                     variant="outlined"
                     onClick={() => {
                       //removing the defect position due to user has been changing the mode big font
-                      localStorage.removeItem("defectEntryCursorPosX");
-                      localStorage.removeItem("defectEntryCursorPosY");
+                      localStorage.removeItem("defectLog");
                       setBooleans({ ...booleans, bigFont: true });
                     }}
                   >

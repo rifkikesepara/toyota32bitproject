@@ -44,6 +44,8 @@ export default function ErrorLog(props) {
       process: "",
       defectX: 0,
       defectY: 0,
+      defectName: "",
+      partName: "",
     },
     onSubmit: (values) => {
       setLoading(true);
@@ -198,11 +200,16 @@ export default function ErrorLog(props) {
                 loading={loading}
                 type="submit"
                 onClick={() => {
+                  let storedData = JSON.parse(
+                    localStorage.getItem("defectLog")
+                  );
                   //getting the defect position from local storage that has been stored before to log
                   formik.setValues({
                     ...formik.values,
-                    defectX: localStorage.getItem("defectEntryCursorPosX"),
-                    defectY: localStorage.getItem("defectEntryCursorPosY"),
+                    defectX: storedData.posX,
+                    defectY: storedData.posY,
+                    defectName: storedData.defect,
+                    partName: storedData.label,
                   });
                 }}
               >

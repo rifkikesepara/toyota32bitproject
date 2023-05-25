@@ -32,8 +32,20 @@ export default function DefectEntryImage(props) {
     setLocalMousePos({ x: localX, y: localY });
 
     //storing the defect position into the local storage to get position when defect is logged
-    localStorage.setItem("defectEntryCursorPosX", cursorPos.x);
-    localStorage.setItem("defectEntryCursorPosY", cursorPos.y);
+    localStorage.setItem(
+      "defectLog",
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem("defectLog")),
+        posX: cursorPos.x,
+      })
+    );
+    localStorage.setItem(
+      "defectLog",
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem("defectLog")),
+        posY: cursorPos.y,
+      })
+    );
   };
 
   //the function that handles if the clicked box has child image if not then the defect positioning will be activated
@@ -123,6 +135,13 @@ export default function DefectEntryImage(props) {
                         anchorEl: 0,
                         value: event.defectId,
                       });
+                      localStorage.setItem(
+                        "defectLog",
+                        JSON.stringify({
+                          label: data.labelText,
+                          defect: event.defectName,
+                        })
+                      );
                       props.setSelectedDefect(data.labelText, event.defectName);
                     }}
                   />

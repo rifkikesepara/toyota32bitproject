@@ -190,217 +190,215 @@ export default function ErrorList() {
   };
 
   return (
-    <>
-      <div style={{ height: "100vh" }}>
-        <VirtualTable
-          style={{ backgroundColor: "#ffc840" }}
-          setScrollerRef={(ref) => {
-            scrollerRef = ref;
-          }}
-          data={defectList}
-          columns={columns}
-          height="80%"
-          scrolledTop={scrolledTop}
-          isRefreshed={setRefresh}
-          isFiltered={(bool) => {
-            if (!bool) setFilterWord({ bodyNo: "", assyNo: "" });
-          }}
-          filterWord={filterWord}
-        />
+    <div style={{ height: "100vh" }}>
+      <VirtualTable
+        style={{ backgroundColor: "#ffc840" }}
+        setScrollerRef={(ref) => {
+          scrollerRef = ref;
+        }}
+        data={defectList}
+        columns={columns}
+        height="80%"
+        scrolledTop={scrolledTop}
+        isRefreshed={setRefresh}
+        isFiltered={(bool) => {
+          if (!bool) setFilterWord({ bodyNo: "", assyNo: "" });
+        }}
+        filterWord={filterWord}
+      />
+      <div
+        className="row"
+        style={{
+          margin: 0,
+          width: "100%",
+          height: "18%",
+          position: "absolute",
+          bottom: 0,
+          justifyContent: "space-around",
+        }}
+      >
         <div
-          className="row"
-          style={{
-            margin: 0,
-            width: "100%",
-            height: "18%",
-            position: "absolute",
-            bottom: 0,
-            justifyContent: "space-around",
-          }}
+          className="column"
+          style={{ justifyContent: "space-evenly", width: "auto" }}
         >
           <div
-            className="column"
-            style={{ justifyContent: "space-evenly", width: "auto" }}
+            className="row"
+            style={{ margin: 0, width: "100%", justifyContent: "center" }}
           >
-            <div
-              className="row"
-              style={{ margin: 0, width: "100%", justifyContent: "center" }}
-            >
-              <CustomTextField
-                autoComplete="off"
-                placeholder={t("assemblyNo").toUpperCase()}
-                kayboardLayout="numeric"
-                keyboardWidth="25%"
-                sx={{
-                  backgroundColor: "white",
-                  borderRadius: "5px",
-                  border: "1px solid black",
-                }}
-                keyboardSX={{ bottom: 0 }}
-                width={200}
-                name="filterNo"
-                setValues={setFilterWord}
-                values={filterWord}
-                iconPosition="right"
-              />
-              <Button
-                variant="contained"
-                sx={{
-                  ...buttonStyle("white"),
-                  height: 60,
-                  width: "100px",
-                  marginInline: "5px",
-                }}
-                onClick={() => setFilterWord(filterWord)}
-              >
-                {t("search").toUpperCase()}
-              </Button>
-            </div>
-
-            <div
-              className="row"
-              style={{ margin: 0, width: "100%", justifyContent: "center" }}
-            >
-              <CustomTextField
-                autoComplete="off"
-                keyboardSX={{ bottom: 0 }}
-                kayboardLayout="numeric"
-                keyboardWidth="25%"
-                placeholder={t("bodyNo").toUpperCase()}
-                sx={{
-                  backgroundColor: "white",
-                  borderRadius: "5px",
-                  border: "1px solid black",
-                }}
-                width={200}
-                name="bodyNo"
-                setValues={setFilterWord}
-                values={filterWord}
-                iconPosition="right"
-              />
-              <Button
-                variant="contained"
-                sx={{
-                  ...buttonStyle("white"),
-                  height: 60,
-                  width: "100px",
-                  marginInline: "5px",
-                }}
-                onClick={() => {
-                  setFilterWord(filterWord);
-                }}
-              >
-                {t("search").toUpperCase()}
-              </Button>
-            </div>
-          </div>
-          <div
-            className="column"
-            style={{ margin: 0, justifyContent: "center", width: "10%" }}
-          >
+            <CustomTextField
+              autoComplete="off"
+              placeholder={t("assemblyNo").toUpperCase()}
+              kayboardLayout="numeric"
+              keyboardWidth="25%"
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "5px",
+                border: "1px solid black",
+              }}
+              keyboardSX={{ bottom: 0 }}
+              width={200}
+              name="filterNo"
+              setValues={setFilterWord}
+              values={filterWord}
+              iconPosition="right"
+            />
             <Button
               variant="contained"
-              onClick={() => {
-                scroll(+5);
-              }}
               sx={{
-                ...buttonStyle("red"),
-                width: "100%",
-                height: "45%",
-                marginBottom: "1px",
-                border: "none",
-                borderRadius: 0,
-                borderTopRightRadius: 15,
-                borderTopLeftRadius: 15,
+                ...buttonStyle("white"),
+                height: 60,
+                width: "100px",
+                marginInline: "5px",
               }}
+              onClick={() => setFilterWord(filterWord)}
             >
-              <ArrowIcon style={{ transform: "rotate(-90deg)" }} />
-            </Button>
-            <Button
-              onClick={() => {
-                scroll(-5);
-              }}
-              sx={{
-                ...buttonStyle("red"),
-                width: "100%",
-                height: "45%",
-                marginBottom: "1px",
-                borderRadius: 0,
-                border: "none",
-                borderBottomRightRadius: 15,
-                borderBottomLeftRadius: 15,
-              }}
-            >
-              <ArrowIcon style={{ transform: "rotate(90deg)" }} />
+              {t("search").toUpperCase()}
             </Button>
           </div>
+
           <div
             className="row"
-            style={{
-              height: "100%",
-              margin: 0,
-              width: "60%",
-              marginLeft: "5px",
-            }}
+            style={{ margin: 0, width: "100%", justifyContent: "center" }}
           >
+            <CustomTextField
+              autoComplete="off"
+              keyboardSX={{ bottom: 0 }}
+              kayboardLayout="numeric"
+              keyboardWidth="25%"
+              placeholder={t("bodyNo").toUpperCase()}
+              sx={{
+                backgroundColor: "white",
+                borderRadius: "5px",
+                border: "1px solid black",
+              }}
+              width={200}
+              name="bodyNo"
+              setValues={setFilterWord}
+              values={filterWord}
+              iconPosition="right"
+            />
             <Button
+              variant="contained"
               sx={{
                 ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
+                height: 60,
+                width: "100px",
+                marginInline: "5px",
+              }}
+              onClick={() => {
+                setFilterWord(filterWord);
               }}
             >
-              {t("vehicleList").toUpperCase()}
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
-              }}
-            >
-              {t("manuelDefect").toUpperCase()}
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
-              }}
-            >
-              {t("multipleDefect").toUpperCase()}
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
-              }}
-            >
-              {t("defectList").toUpperCase()}
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
-              }}
-            >
-              {t("defectCopy").toUpperCase()}
-            </Button>
-            <Button
-              sx={{
-                ...buttonStyle("white"),
-                width: "16.6%",
-                height: "85%",
-              }}
-              href="/terminals"
-            >
-              {t("quit").toUpperCase()}
+              {t("search").toUpperCase()}
             </Button>
           </div>
         </div>
+        <div
+          className="column"
+          style={{ margin: 0, justifyContent: "center", width: "10%" }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => {
+              scroll(+5);
+            }}
+            sx={{
+              ...buttonStyle("red"),
+              width: "100%",
+              height: "45%",
+              marginBottom: "1px",
+              border: "none",
+              borderRadius: 0,
+              borderTopRightRadius: 15,
+              borderTopLeftRadius: 15,
+            }}
+          >
+            <ArrowIcon style={{ transform: "rotate(-90deg)" }} />
+          </Button>
+          <Button
+            onClick={() => {
+              scroll(-5);
+            }}
+            sx={{
+              ...buttonStyle("red"),
+              width: "100%",
+              height: "45%",
+              marginBottom: "1px",
+              borderRadius: 0,
+              border: "none",
+              borderBottomRightRadius: 15,
+              borderBottomLeftRadius: 15,
+            }}
+          >
+            <ArrowIcon style={{ transform: "rotate(90deg)" }} />
+          </Button>
+        </div>
+        <div
+          className="row"
+          style={{
+            height: "100%",
+            margin: 0,
+            width: "60%",
+            marginLeft: "5px",
+          }}
+        >
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+          >
+            {t("vehicleList").toUpperCase()}
+          </Button>
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+          >
+            {t("manuelDefect").toUpperCase()}
+          </Button>
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+          >
+            {t("multipleDefect").toUpperCase()}
+          </Button>
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+          >
+            {t("defectList").toUpperCase()}
+          </Button>
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+          >
+            {t("defectCopy").toUpperCase()}
+          </Button>
+          <Button
+            sx={{
+              ...buttonStyle("white"),
+              width: "16.6%",
+              height: "85%",
+            }}
+            href="/terminals"
+          >
+            {t("quit").toUpperCase()}
+          </Button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
