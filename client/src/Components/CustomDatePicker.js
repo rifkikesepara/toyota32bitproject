@@ -7,17 +7,20 @@ CustomDatePicker.defaultProps = {
 };
 
 export default function CustomDatePicker({ startDate, disabled, ...props }) {
-  const [days] = useState([]);
-  const [months] = useState([]);
-  const [years] = useState([2023]);
+  const [days] = useState([]); //numbers of days in a month
+  const [months] = useState([]); //numbers of months in a year
+  const [years] = useState([2023]); //years
 
-  const [date, setDate] = useState(startDate);
+  const [date, setDate] = useState(startDate); //storing date from Date class
+
+  //storing date as an object all datas are seperated as an object
   const [objectDate, setObjectDate] = useState({
     day: startDate.getDate(),
     month: startDate.getUTCMonth() + 1,
     year: startDate.getFullYear(),
   });
 
+  //the function that pushes day numbers which is from 1 to count
   const setDays = (count) => {
     days.splice(0, days.length);
     for (let i = 1; i <= count; i++) {
@@ -26,6 +29,7 @@ export default function CustomDatePicker({ startDate, disabled, ...props }) {
     }
   };
 
+  //the function that checks whether the selected year is a leap year or not
   const checkLeapYear = (year) => {
     if (year % 4 == 0) {
       if (year % 100 == 0) {
@@ -35,6 +39,7 @@ export default function CustomDatePicker({ startDate, disabled, ...props }) {
     } else return false;
   };
 
+  //the function that changes the day counts accordion to selected month and the leap year
   const formatDay = (month, year) => {
     if (month < 9) {
       if (month % 2 == 0) {
@@ -54,6 +59,7 @@ export default function CustomDatePicker({ startDate, disabled, ...props }) {
     }
   };
 
+  //the function that stores the date whenever a select component component's value changes
   const handleDate = (event) => {
     let tempDate = date;
     setObjectDate({ ...objectDate, [event.target.name]: event.target.value });
@@ -65,6 +71,7 @@ export default function CustomDatePicker({ startDate, disabled, ...props }) {
     setDate(tempDate);
   };
 
+  //pushes the default counts to day, month and year whenever the component appears
   useEffect(() => {
     for (let i = 1; i < 13; i++) {
       if (i < 10) months.push("0" + i.toString());

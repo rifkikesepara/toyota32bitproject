@@ -32,6 +32,8 @@ After that you will be able to launch the program:
 
 If you do this steps properly you will be okay. You can enjoy the application :)
 
+About documentation of [Application](client)
+
 ### Changing the API that app uses
 
 If you want to use your own backend server for this application there is a json file called **api.json** you can change the url value whatever your server uses. After changing the api url app will adapt immediately.
