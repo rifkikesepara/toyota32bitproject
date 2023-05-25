@@ -158,7 +158,7 @@ This component is used for picking a date from 3 seperate select components whic
 
 This hook is used for fetching data from an api at certain time intervals. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the fetching time so data will be fetched slower or faster by whatever time you changed. Returns the fetched data.
 
-useGetData(url: string, timeout: number, then: function)
+    useGetData(url: string, timeout: number, then: function)
 
 ---
 
@@ -166,7 +166,7 @@ useGetData(url: string, timeout: number, then: function)
 
 This hook is used for fetching data for once depending on the value that you give the hook. With using this hook you can manuplate the data that you fetched from the api, with passing a function in it. You can change the dependency value so that data will be fetched one more time. Return the fetched data.
 
-useGetDataOnce(url: string, dependency: any, then: function)
+    useGetDataOnce(url: string, dependency: any, then: function)
 
 ---
 
@@ -174,6 +174,5 @@ useGetDataOnce(url: string, dependency: any, then: function)
 
 This hook gives you the ability to access the alert component's context so that you can manipulate variables of alert such as messeage type **(success, error)** , alert message, alert duration and the thing that you want to do after alert is finished
 
-const{setAlert} = useAlert();
-
-setAlert(message: string, type: string, duration: number, onFinish: function);
+    const{setAlert} = useAlert();
+    setAlert(message: string, type: string, duration: number, onFinish: function);
