@@ -87,3 +87,14 @@ You don't have to ever use `eject`. The curated feature set is suitable for smal
 - react-lineto
 - react-virtuoso
 - react-i18next
+
+## Screenshots
+![Screenshot1](https://github.com/user-attachments/assets/3c43fca6-a268-439a-8156-1de569a5774e)
+![Screenshot2](https://github.com/user-attachments/assets/29753f1a-9d4c-4779-9a5b-dc1258fd6442)
+![Screenshot3](https://github.com/user-attachments/assets/4a10572f-efec-4e92-b3b4-b96f9735c7ec)
+![Screenshot4](https://github.com/user-attachments/assets/35a0ec5f-6fbf-4030-bf4b-1c4dfd677bf7)
+![Screenshot5](https://github.com/user-attachments/assets/4b7da91f-422a-4c29-88cf-7e6cf97573a0)
+![Screenshot6](https://github.com/user-attachments/assets/a2c5f0e9-eb5d-4539-9acd-1110b95954e8)
+![Screenshot7](https://github.com/user-attachments/assets/f7b28d60-d2d6-4273-b41d-0cc4abb4eb3f)
+
+
